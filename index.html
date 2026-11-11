@@ -1,0 +1,1727 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7D1C4B">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bitácora ET">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Bitácora ET</title>
+<style>
+:root{
+  --guinda:#7D1C4B; --guinda-osc:#581135; --dorado:#BFA262; --dorado-osc:#9C7E3F;
+  --card-guinda:#F6F1F3; --card-dorado:#F7F2E9; --linea:#E7DDE2;
+  --bg:#f4eff1; --panel:#ffffff; --txt:#2b232a; --muted:#8a7f86;
+  --ok:#2e7d52; --warn:#b4701f; --danger:#b23a48;
+  --shadow:0 1px 3px rgba(88,17,53,.08), 0 6px 20px rgba(88,17,53,.06);
+  --r:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  font-family:"Segoe UI",Calibri,system-ui,Roboto,Arial,sans-serif;
+  background:var(--bg); color:var(--txt); -webkit-text-size-adjust:100%;
+  overflow:hidden;
+}
+button,input,textarea,select{font-family:inherit;font-size:1rem}
+button{cursor:pointer}
+.hex{display:inline-block;width:1em;height:1.1em;vertical-align:-.15em;
+  background:var(--dorado);clip-path:polygon(25% 5%,75% 5%,100% 50%,75% 95%,25% 95%,0 50%)}
+
+/* ---------- Layout ---------- */
+#app{display:flex;flex-direction:column;height:100%}
+header.top{
+  background:linear-gradient(100deg,var(--guinda),var(--guinda-osc));
+  color:#fff;padding:env(safe-area-inset-top) 0 0;flex:0 0 auto;box-shadow:var(--shadow);z-index:20
+}
+.top-in{display:flex;align-items:center;gap:10px;padding:10px 14px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:600;letter-spacing:.2px}
+.brand .logo{width:30px;height:30px;border-radius:8px;background:var(--dorado);
+  display:grid;place-items:center;color:var(--guinda-osc);font-weight:800;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.brand small{display:block;font-weight:400;font-size:.68rem;opacity:.85;letter-spacing:.3px}
+.top .spacer{flex:1}
+.icon-btn{background:rgba(255,255,255,.14);border:0;color:#fff;width:38px;height:38px;border-radius:10px;
+  display:grid;place-items:center;font-size:1.15rem}
+.icon-btn:active{background:rgba(255,255,255,.28)}
+.syncdot{width:9px;height:9px;border-radius:50%;background:#c9b48f;margin-left:2px}
+.syncdot.on{background:#8fe3a9}.syncdot.err{background:#ffb0b0}.syncdot.busy{background:#ffe08a;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.35}}
+
+main{flex:1;overflow:auto;position:relative;-webkit-overflow-scrolling:touch}
+.view{display:none;padding:14px 14px 90px;max-width:960px;margin:0 auto}
+.view.active{display:block}
+
+/* ---------- Bottom nav ---------- */
+nav.tabs{
+  flex:0 0 auto;display:flex;background:var(--panel);border-top:1px solid var(--linea);
+  padding-bottom:env(safe-area-inset-bottom);z-index:20
+}
+nav.tabs button{flex:1;background:none;border:0;padding:8px 2px 7px;color:var(--muted);
+  display:flex;flex-direction:column;align-items:center;gap:3px;font-size:.68rem}
+nav.tabs button .ic{font-size:1.3rem;line-height:1}
+nav.tabs button.active{color:var(--guinda);font-weight:600}
+nav.tabs button.active .ic{transform:translateY(-1px)}
+
+/* ---------- Common ---------- */
+.card{background:var(--panel);border:1px solid var(--linea);border-radius:var(--r);box-shadow:var(--shadow);margin-bottom:12px}
+.pad{padding:14px}
+h1,h2,h3{margin:0}
+.sec-title{display:flex;align-items:center;gap:8px;margin:4px 2px 12px;font-size:1.05rem;color:var(--guinda-osc)}
+.sec-title .count{margin-left:auto;background:var(--card-dorado);color:var(--dorado-osc);
+  border-radius:999px;padding:2px 10px;font-size:.78rem;font-weight:600}
+.muted{color:var(--muted)}
+.row{display:flex;gap:10px;align-items:center}
+.wrap{flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:5px;background:var(--card-guinda);color:var(--guinda-osc);
+  border-radius:999px;padding:3px 10px;font-size:.76rem;font-weight:600;border:1px solid var(--linea)}
+.chip.est{color:#fff}
+.tag-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.btn{background:var(--guinda);color:#fff;border:0;border-radius:10px;padding:10px 16px;font-weight:600;
+  display:inline-flex;align-items:center;gap:7px}
+.btn:active{background:var(--guinda-osc)}
+.btn.sec{background:var(--card-guinda);color:var(--guinda)}
+.btn.gold{background:var(--dorado);color:var(--guinda-osc)}
+.btn.ghost{background:none;color:var(--guinda);border:1px solid var(--linea)}
+.btn.sm{padding:6px 11px;font-size:.84rem;border-radius:9px}
+.btn.block{width:100%;justify-content:center}
+.btn.danger{background:#fbe9eb;color:var(--danger)}
+.fab{position:fixed;right:16px;bottom:calc(68px + env(safe-area-inset-bottom));
+  width:58px;height:58px;border-radius:50%;background:var(--guinda);color:#fff;border:0;font-size:1.8rem;
+  box-shadow:0 6px 18px rgba(88,17,53,.4);z-index:15;display:grid;place-items:center}
+.fab:active{background:var(--guinda-osc)}
+
+label.fld{display:block;margin-bottom:12px}
+label.fld>span{display:block;font-size:.8rem;font-weight:600;color:var(--guinda-osc);margin-bottom:4px}
+input,textarea,select{width:100%;padding:10px 12px;border:1px solid var(--linea);border-radius:10px;
+  background:#fff;color:var(--txt)}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--dorado);border-color:transparent}
+textarea{min-height:90px;resize:vertical;line-height:1.45}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+@media(max-width:520px){.grid2{grid-template-columns:1fr}}
+
+/* list items */
+.item{display:flex;gap:12px;padding:12px 14px;border-bottom:1px solid var(--linea);cursor:pointer}
+.item:last-child{border-bottom:0}
+.item:active{background:var(--card-guinda)}
+.item .avatar{flex:0 0 auto;width:42px;height:42px;border-radius:11px;display:grid;place-items:center;
+  font-size:1.25rem;background:var(--card-dorado)}
+.item .main{flex:1;min-width:0}
+.item .main .t{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .main .s{font-size:.82rem;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.item .meta{text-align:right;font-size:.72rem;color:var(--muted);flex:0 0 auto}
+
+.daygroup{margin-bottom:14px}
+.dayhdr{position:sticky;top:0;background:var(--bg);padding:6px 4px;font-weight:700;color:var(--guinda-osc);
+  font-size:.84rem;text-transform:capitalize;z-index:5}
+
+/* empty */
+.empty{text-align:center;color:var(--muted);padding:40px 20px}
+.empty .big{font-size:2.6rem;opacity:.5}
+
+/* search bar */
+.searchbar{display:flex;gap:8px;margin-bottom:12px;align-items:center}
+.searchbar input{flex:1}
+
+/* filters */
+.filters{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px;-webkit-overflow-scrolling:touch}
+.filters .chip{white-space:nowrap;cursor:pointer;background:#fff}
+.filters .chip.on{background:var(--guinda);color:#fff;border-color:var(--guinda)}
+
+/* progress */
+.prog{height:8px;background:var(--linea);border-radius:999px;overflow:hidden}
+.prog>i{display:block;height:100%;background:linear-gradient(90deg,var(--dorado),var(--guinda))}
+
+/* task */
+.task{display:flex;align-items:flex-start;gap:10px;padding:10px 4px;border-bottom:1px solid var(--linea)}
+.task:last-child{border-bottom:0}
+.check{flex:0 0 auto;width:24px;height:24px;border-radius:7px;border:2px solid var(--dorado);
+  display:grid;place-items:center;color:#fff;font-size:.9rem;margin-top:1px}
+.check.on{background:var(--ok);border-color:var(--ok)}
+.task.done .tt{text-decoration:line-through;color:var(--muted)}
+.task .tt{font-weight:500}
+
+/* attachments */
+.attgrid{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.att{position:relative;width:76px;height:76px;border-radius:10px;overflow:hidden;border:1px solid var(--linea);background:var(--card-dorado)}
+.att img{width:100%;height:100%;object-fit:cover}
+.att .file{display:grid;place-items:center;height:100%;font-size:1.6rem;color:var(--dorado-osc)}
+.att .x{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.55);color:#fff;border:0;border-radius:50%;width:20px;height:20px;font-size:.8rem;line-height:1}
+.att .nm{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.5);color:#fff;font-size:.55rem;padding:1px 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.att .cloud{position:absolute;bottom:2px;left:2px;background:rgba(46,125,82,.92);color:#fff;border-radius:50%;width:16px;height:16px;display:grid;place-items:center;font-size:.6rem}
+
+/* modal */
+.sheet-bg{position:fixed;inset:0;background:rgba(43,35,42,.5);z-index:40;display:none;align-items:flex-end;justify-content:center}
+.sheet-bg.open{display:flex}
+.sheet{background:var(--panel);width:100%;max-width:640px;max-height:94%;border-radius:18px 18px 0 0;
+  display:flex;flex-direction:column;animation:up .22s ease}
+@media(min-width:641px){.sheet{border-radius:18px;margin-bottom:3vh}.sheet-bg{align-items:center}}
+@keyframes up{from{transform:translateY(40px);opacity:.6}}
+.sheet header{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--linea);flex:0 0 auto}
+.sheet header h3{flex:1;font-size:1.02rem;color:var(--guinda-osc)}
+.sheet .body{overflow:auto;padding:16px}
+.sheet footer{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--linea);flex:0 0 auto}
+.sheet footer .btn{flex:1;justify-content:center}
+
+/* toast */
+#toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);
+  background:var(--guinda-osc);color:#fff;padding:10px 18px;border-radius:999px;font-size:.88rem;
+  box-shadow:var(--shadow);z-index:60;opacity:0;pointer-events:none;transition:opacity .25s, transform .25s;max-width:90%}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* detail header */
+.detail-hero{background:linear-gradient(120deg,var(--guinda),var(--guinda-osc));color:#fff;border-radius:var(--r);padding:16px;margin-bottom:12px}
+.detail-hero h2{font-size:1.2rem;margin-bottom:6px}
+.detail-hero .meta-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.detail-hero .chip{background:rgba(255,255,255,.18);color:#fff;border-color:transparent}
+
+.kv{display:flex;gap:8px;padding:7px 0;border-bottom:1px solid var(--linea);font-size:.9rem}
+.kv:last-child{border-bottom:0}
+.kv b{flex:0 0 42%;color:var(--guinda-osc);font-weight:600}
+.kv span{flex:1;white-space:pre-wrap}
+a.maplink{color:var(--guinda);font-weight:600;text-decoration:none}
+
+.pwa-banner{position:fixed;left:12px;right:12px;bottom:calc(74px + env(safe-area-inset-bottom));
+  background:var(--guinda-osc);color:#fff;border-radius:14px;padding:12px 14px;display:none;gap:10px;align-items:center;z-index:30;box-shadow:var(--shadow)}
+.pwa-banner.show{display:flex}
+.pwa-banner .btn{background:var(--dorado);color:var(--guinda-osc);padding:7px 12px}
+.hidden{display:none!important}
+
+/* ---------- Pantalla de acceso ---------- */
+#login{position:fixed;inset:0;z-index:80;background:linear-gradient(140deg,var(--guinda),var(--guinda-osc));
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;overflow:auto}
+#login .box{background:var(--panel);border-radius:20px;box-shadow:0 10px 40px rgba(0,0,0,.3);width:100%;max-width:380px;padding:26px 22px}
+#login .logo{width:64px;height:64px;border-radius:18px;background:linear-gradient(120deg,var(--guinda),var(--guinda-osc));display:grid;place-items:center;margin:0 auto 12px}
+#login .logo span{color:var(--dorado);font-weight:800;font-size:1.4rem}
+#login h1{text-align:center;color:var(--guinda-osc);font-size:1.3rem;margin-bottom:2px}
+#login .sub{text-align:center;color:var(--muted);font-size:.8rem;margin-bottom:18px}
+#login .err{background:#fbe9eb;color:var(--danger);border-radius:10px;padding:8px 12px;font-size:.84rem;margin-bottom:12px;display:none}
+#login .err.show{display:block}
+#login .foot{text-align:center;color:rgba(255,255,255,.8);font-size:.72rem;margin-top:16px}
+
+/* ---------- Roles / Equipo ---------- */
+.role{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:2px 10px;font-size:.72rem;font-weight:700;color:#fff}
+.role.desarrollador{background:#7D1C4B}.role.administrador{background:#1f6f8b}.role.usuario{background:#2e7d52}.role.observador{background:#8a7f86}
+.person .avatar{background:var(--card-guinda);color:var(--guinda);font-weight:800}
+.perm-row{display:flex;align-items:center;gap:8px;padding:8px 2px;border-bottom:1px solid var(--linea)}
+.perm-row:last-child{border-bottom:0}
+.perm-row .pl{flex:1;font-size:.86rem}
+.perm-grid{display:grid;grid-template-columns:1.4fr repeat(4,1fr);gap:4px;font-size:.66rem;text-align:center;align-items:center}
+.perm-grid .hd{font-weight:700;color:var(--guinda-osc);padding:4px 2px}
+.perm-grid .cap{text-align:left;font-size:.74rem;padding:5px 2px;color:var(--txt)}
+.perm-grid input{width:18px;height:18px}
+.me-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.16);color:#fff;border-radius:999px;padding:3px 10px;font-size:.74rem}
+.hr{height:1px;background:var(--linea);margin:12px 0;border:0}
+.small{font-size:.8rem}
+.right{margin-left:auto}
+
+/* ---------- Dashboard (KPIs estilo panel) ---------- */
+.dash-hero{background:linear-gradient(120deg,var(--guinda),var(--guinda-osc) 70%,#3f0d26);
+  border-radius:18px;padding:16px 16px 18px;color:#fff;box-shadow:var(--shadow);margin-bottom:14px;position:relative;overflow:hidden}
+.dash-hero::after{content:"";position:absolute;right:-28px;top:-28px;width:120px;height:120px;border-radius:50%;
+  background:radial-gradient(circle at 30% 30%, rgba(191,162,98,.55), rgba(191,162,98,0) 70%)}
+.dash-hero .hi{font-size:1.15rem;font-weight:700;letter-spacing:.2px}
+.dash-hero .sub{font-size:.8rem;opacity:.85;margin-top:2px}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px;position:relative;z-index:1}
+@media(max-width:560px){.kpi-row{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:11px 12px;
+  backdrop-filter:blur(2px);cursor:pointer;transition:transform .12s, background .15s}
+.kpi:active{transform:scale(.97)}
+.kpi .n{font-size:1.5rem;font-weight:800;line-height:1.05;letter-spacing:-.5px}
+.kpi .l{font-size:.68rem;opacity:.9;margin-top:2px;line-height:1.15}
+.kpi .ic{font-size:.95rem}
+.kpi.gold .n{color:var(--dorado)}
+.kpi.warn .n{color:#ffd9a8}
+.kpi.ok .n{color:#b7f0c9}
+.dash-mini{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.dash-mini .m{background:var(--panel);border:1px solid var(--linea);border-radius:12px;padding:8px 12px;font-size:.78rem;
+  color:var(--txt);display:flex;align-items:center;gap:7px;box-shadow:var(--shadow)}
+.dash-mini .m b{color:var(--guinda-osc)}
+
+/* ---------- Calendario (estilo DayNotez) ---------- */
+.view-toggle{display:flex;gap:6px;margin-bottom:10px}
+.view-toggle button{flex:1;padding:8px;border-radius:10px;border:1px solid var(--linea);background:#fff;color:var(--muted);font-weight:600;font-size:.84rem}
+.view-toggle button.on{background:var(--guinda);color:#fff;border-color:var(--guinda)}
+.cal{background:var(--panel);border:1px solid var(--linea);border-radius:var(--r);box-shadow:var(--shadow);padding:10px;margin-bottom:14px}
+.cal-hd{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.cal-hd .m{flex:1;text-align:center;font-weight:700;color:var(--guinda-osc);text-transform:capitalize;font-size:1.02rem}
+.cal-nav{background:var(--card-guinda);color:var(--guinda);border:0;width:36px;height:36px;border-radius:10px;font-size:1.25rem;line-height:1}
+.cal-nav:active{background:var(--guinda);color:#fff}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;grid-auto-rows:max-content}
+.cal-dow{text-align:center;font-size:.68rem;color:var(--muted);font-weight:700;padding:3px 0}
+.cal-dow.wk{color:var(--dorado-osc)}
+.cal-cell{min-height:58px;border:1px solid var(--linea);border-radius:8px;padding:2px 2px 2px;
+  display:flex;flex-direction:column;cursor:pointer;background:#fff;position:relative;overflow:hidden}
+.cal-cell.blank{border:0;background:none;cursor:default}
+.cal-cell .n{font-size:.68rem;color:var(--muted);font-weight:700;line-height:1;padding:1px 2px}
+.cal-cell.wknd{background:var(--card-dorado)}
+.cal-cell.today{outline:2px solid #5a535f;outline-offset:-2px}
+.cal-cell.today .n{color:#3a3340}
+.cal-cell.sel{background:#ECE7EA;box-shadow:inset 0 0 0 2px #5a535f;border-color:transparent}
+.cal-cell.sel .n{color:#3a3340}
+.cal-cell .ics{display:flex;flex-wrap:wrap;gap:0;font-size:.8rem;line-height:1.05;padding:0 1px;align-content:flex-start;flex:0 0 auto}
+.cal-cell .more{font-size:.52rem;color:var(--dorado-osc);font-weight:800}
+.cal-cell.sel .more{color:var(--dorado-osc)}
+.cal-cell .tmark{font-size:.6rem;color:#2e7d52;font-weight:800;margin-left:1px;line-height:1}
+/* líneas de proyecto (cómo está agendado cada programa) */
+.cal-cell .bars{display:block;margin-top:auto;pointer-events:none}
+.cal-cell .bar{display:block;height:4px;margin-bottom:2px}
+.cal-cell .bar.blank{background:transparent}
+.cal-cell .bar.s{border-top-left-radius:3px;border-bottom-left-radius:3px;margin-left:1px}
+.cal-cell .bar.e{border-top-right-radius:3px;border-bottom-right-radius:3px;margin-right:1px}
+.cal-legend{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:10px;padding-top:8px;border-top:1px solid var(--linea)}
+.cal-legend .lg{display:inline-flex;align-items:center;gap:5px;font-size:.74rem;color:var(--txt);cursor:pointer;max-width:48%}
+.cal-legend .lg .sw{width:14px;height:5px;border-radius:3px;flex:0 0 auto}
+.cal-legend .lg .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dayhead{display:flex;align-items:center;gap:8px;margin:4px 2px 10px}
+.dayhead .d{font-weight:700;color:var(--guinda-osc);text-transform:capitalize;font-size:.98rem;flex:1}
+@media(max-width:380px){.cal-cell{min-height:52px}.cal-cell .ics{font-size:.7rem}}
+</style>
+</head>
+<body>
+<div id="login" class="hidden">
+  <div class="box">
+    <div class="logo"><span>ET</span></div>
+    <h1>Bitácora ET</h1>
+    <div class="sub">Estudios Territoriales · SEGEY</div>
+    <div class="err" id="loginErr"></div>
+    <label class="fld"><span>Usuario</span><input id="li_user" autocomplete="username" autocapitalize="none" placeholder="tu usuario"></label>
+    <label class="fld"><span>Contraseña</span><input id="li_pass" type="password" autocomplete="current-password" placeholder="tu contraseña"></label>
+    <button class="btn block" id="li_btn">Entrar</button>
+  </div>
+  <div class="foot">Acceso para el equipo de Estudios Territoriales</div>
+</div>
+
+<div id="app" class="hidden">
+  <header class="top">
+    <div class="top-in">
+      <div class="brand" id="brand" style="cursor:pointer" onclick="showAbout()">
+        <div class="logo">ET</div>
+        <div>Bitácora ET<small>Estudios Territoriales · SEGEY</small></div>
+      </div>
+      <div class="spacer"></div>
+      <div class="syncdot" id="syncDot" title="Sincronización"></div>
+      <button class="icon-btn" id="btnSync" title="Sincronizar">⟳</button>
+      <button class="icon-btn" id="btnCfg" title="Configuración">⚙</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- BITÁCORA -->
+    <section class="view active" id="v-bitacora">
+      <div class="searchbar">
+        <input id="bitSearch" placeholder="Buscar en la bitácora…">
+      </div>
+      <div class="view-toggle">
+        <button id="tgCal" class="on" onclick="setBitView('cal')">📅 Calendario</button>
+        <button id="tgList" onclick="setBitView('list')">☰ Lista</button>
+      </div>
+      <div class="filters" id="bitFilters"></div>
+      <div id="bitCal"></div>
+      <div id="bitList"></div>
+    </section>
+
+    <!-- PROYECTOS -->
+    <section class="view" id="v-proyectos">
+      <div id="projDash"></div>
+      <div class="sec-title"><span class="hex"></span> Proyectos <span class="count" id="projCount">0</span></div>
+      <div class="filters" id="projFilters"></div>
+      <div id="projList"></div>
+    </section>
+
+    <!-- TAREAS -->
+    <section class="view" id="v-tareas">
+      <div class="sec-title"><span class="hex"></span> Tareas <span class="count" id="taskCount">0</span></div>
+      <div class="filters" id="taskFilters"></div>
+      <div id="taskList"></div>
+    </section>
+
+    <!-- ARCHIVOS -->
+    <section class="view" id="v-archivos">
+      <div class="searchbar">
+        <input id="fileSearch" placeholder="Buscar archivos…">
+        <select id="fileSort" style="width:auto;flex:0 0 auto">
+          <option value="recientes">Recientes</option>
+          <option value="nombre">Nombre</option>
+          <option value="tamano">Tamaño</option>
+          <option value="tipo">Clasificación</option>
+        </select>
+      </div>
+      <div class="filters" id="fileFilters"></div>
+      <div id="fileList"></div>
+    </section>
+
+    <!-- EQUIPO -->
+    <section class="view" id="v-equipo">
+      <div class="sec-title"><span class="hex"></span> Equipo <span class="count" id="teamCount">0</span></div>
+      <div id="teamList"></div>
+    </section>
+
+    <!-- DETALLE (proyecto) -->
+    <section class="view" id="v-detalle"></section>
+  </main>
+
+  <button class="fab" id="fab">＋</button>
+
+  <nav class="tabs">
+    <button data-tab="bitacora" class="active"><span class="ic">📓</span>Bitácora</button>
+    <button data-tab="proyectos"><span class="ic">📁</span>Proyectos</button>
+    <button data-tab="tareas"><span class="ic">✓</span>Tareas</button>
+    <button data-tab="archivos"><span class="ic">🗂️</span>Archivos</button>
+    <button data-tab="equipo"><span class="ic">👥</span>Equipo</button>
+  </nav>
+</div>
+
+<div class="pwa-banner" id="pwaBanner">
+  <div style="flex:1"><b>Instalar Bitácora ET</b><div class="small" style="opacity:.85">Úsala como app, sin navegador y sin conexión.</div></div>
+  <button class="btn" id="pwaInstall">Instalar</button>
+  <button class="icon-btn" id="pwaClose" style="width:30px;height:30px">✕</button>
+</div>
+
+<div class="sheet-bg" id="sheetBg">
+  <div class="sheet" id="sheet">
+    <header><h3 id="sheetTitle">—</h3><button class="icon-btn" id="sheetClose" style="background:var(--card-guinda);color:var(--guinda)">✕</button></header>
+    <div class="body" id="sheetBody"></div>
+    <footer id="sheetFooter"></footer>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ============================================================
+   Bitácora ET — app de archivo único (PWA)
+   Depto. de Estudios Territoriales · SEGEY
+   Offline-first (IndexedDB) + sync opcional a Google Sheets
+   ============================================================ */
+"use strict";
+
+/* ---------- conexión del equipo (pre-configurada) ---------- */
+// Backend Apps Script (cuenta mapas.segey@gmail.com) + hoja "Bitácora ET - Datos".
+const DEFAULT_SYNC_URL = 'https://script.google.com/macros/s/AKfycbyksw3rF9BLiOJuq3yQByRQqVtbJ-KmF-r-THf2xlso5k-zD8do5cUT40yS80uu-mggBQ/exec';
+const DEFAULT_TOKEN    = 'BITACORAET2026';
+
+/* ---------- utilidades ---------- */
+const $ = (s,r=document)=>r.querySelector(s);
+const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
+const uid = ()=> (crypto.randomUUID ? crypto.randomUUID() : 'id-'+Date.now()+'-'+Math.random().toString(16).slice(2));
+const now = ()=> Date.now();
+const esc = s => (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const todayISO = ()=>{const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10);};
+function fmtDate(iso){ if(!iso) return ''; const [y,m,d]=iso.split('-'); const dd=new Date(+y,+m-1,+d);
+  return dd.toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'}); }
+function fmtShort(iso){ if(!iso) return ''; const [y,m,d]=iso.split('-'); return `${d}/${m}/${y.slice(2)}`; }
+function relTime(ts){ if(!ts) return ''; const s=(now()-ts)/1000; if(s<60) return 'ahora';
+  if(s<3600) return Math.floor(s/60)+' min'; if(s<86400) return Math.floor(s/3600)+' h';
+  const d=Math.floor(s/86400); return d<30? d+' d' : fmtShort(new Date(ts).toISOString().slice(0,10)); }
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2600); }
+
+/* ---------- catálogos ---------- */
+const ESTADOS = [
+  {k:'planeacion', t:'Planeación', c:'#8a7f86'},
+  {k:'campo',      t:'En campo',   c:'#2e7d52'},
+  {k:'analisis',   t:'En análisis',c:'#1f6f8b'},
+  {k:'revision',   t:'En revisión',c:'#b4701f'},
+  {k:'concluido',  t:'Concluido',  c:'#7D1C4B'},
+  {k:'pausado',    t:'Pausado',    c:'#b23a48'},
+];
+const estInfo = k => ESTADOS.find(e=>e.k===k) || ESTADOS[0];
+
+// Clasificaciones de archivos (editable). Se auto-sugiere por el tipo de archivo.
+const CLASIF = [
+  {k:'cartografia',  t:'Cartografía',   icon:'🗺️'},
+  {k:'documento',    t:'Documento',     icon:'📄'},
+  {k:'datos',        t:'Datos / Excel', icon:'📊'},
+  {k:'fotografia',   t:'Fotografía',    icon:'📷'},
+  {k:'multimedia',   t:'Audio / Video', icon:'🎬'},
+  {k:'normatividad', t:'Normatividad',  icon:'⚖️'},
+  {k:'otro',         t:'Otro',          icon:'📦'},
+];
+const clasifInfo = k => CLASIF.find(c=>c.k===k) || CLASIF[CLASIF.length-1];
+function autoClasif(type,name){
+  const s=((type||'')+' '+(name||'')).toLowerCase();
+  if(/kml|kmz|google-earth|\.shp|geojson|\.gpx/.test(s)) return 'cartografia';
+  if(/sheet|excel|csv|\.xls|\.csv/.test(s))              return 'datos';
+  if(/^image\/|\.jpg|\.jpeg|\.png|\.heic|\.webp/.test(s))return 'fotografia';
+  if(/^video\/|^audio\/|\.mp4|\.mov|\.mp3|\.wav|\.m4a/.test(s)) return 'multimedia';
+  if(/pdf|word|document|\.doc|\.txt|\.rtf/.test(s))      return 'documento';
+  return 'otro';
+}
+
+// Plantillas de nota. Cada campo: id, etiqueta, tipo (text, area, num, gps)
+const TEMPLATES = {
+  libre:   {t:'Nota libre',     icon:'📝', campos:[]},
+  visita:  {t:'Visita de campo',icon:'📍', campos:[
+      {id:'localidad', l:'Localidad', tipo:'text'},
+      {id:'cct',       l:'Clave CT',  tipo:'text'},
+      {id:'gps',       l:'Coordenadas', tipo:'gps'},
+      {id:'atendio',   l:'Atendió / contacto', tipo:'text'},
+      {id:'hallazgos', l:'Hallazgos', tipo:'area'},
+      {id:'acuerdos',  l:'Acuerdos', tipo:'area'},
+  ]},
+  minuta:  {t:'Minuta de reunión', icon:'🗒️', campos:[
+      {id:'lugar',     l:'Lugar', tipo:'text'},
+      {id:'asistentes',l:'Asistentes', tipo:'area'},
+      {id:'temas',     l:'Temas tratados', tipo:'area'},
+      {id:'acuerdos',  l:'Acuerdos y responsables', tipo:'area'},
+  ]},
+  avance:  {t:'Reporte de avance', icon:'📈', campos:[
+      {id:'avance',    l:'% de avance', tipo:'num'},
+      {id:'realizado', l:'Actividades realizadas', tipo:'area'},
+      {id:'pendiente', l:'Pendientes', tipo:'area'},
+      {id:'riesgos',   l:'Riesgos / bloqueos', tipo:'area'},
+  ]},
+};
+
+/* ============================================================
+   IndexedDB
+   ============================================================ */
+const DB_NAME='bitacoraET', DB_VER=2;
+let db;
+function openDB(){return new Promise((res,rej)=>{
+  const r=indexedDB.open(DB_NAME,DB_VER);
+  r.onupgradeneeded=e=>{const d=e.target.result;
+    if(!d.objectStoreNames.contains('projects')) d.createObjectStore('projects',{keyPath:'id'});
+    if(!d.objectStoreNames.contains('entries'))  d.createObjectStore('entries',{keyPath:'id'});
+    if(!d.objectStoreNames.contains('tasks'))    d.createObjectStore('tasks',{keyPath:'id'});
+    if(!d.objectStoreNames.contains('files'))    d.createObjectStore('files',{keyPath:'id'});
+    if(!d.objectStoreNames.contains('atts'))     d.createObjectStore('atts',{keyPath:'id'});
+    if(!d.objectStoreNames.contains('meta'))     d.createObjectStore('meta',{keyPath:'k'});
+  };
+  r.onsuccess=e=>{db=e.target.result;res();};
+  r.onerror=e=>rej(e);
+});}
+function tx(store,mode='readonly'){return db.transaction(store,mode).objectStore(store);}
+function dbGetAll(store){return new Promise((res,rej)=>{const r=tx(store).getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=rej;});}
+function dbPut(store,v){return new Promise((res,rej)=>{const r=tx(store,'readwrite').put(v);r.onsuccess=()=>res(v);r.onerror=rej;});}
+function dbGet(store,k){return new Promise((res,rej)=>{const r=tx(store).get(k);r.onsuccess=()=>res(r.result);r.onerror=rej;});}
+function dbDel(store,k){return new Promise((res,rej)=>{const r=tx(store,'readwrite').delete(k);r.onsuccess=()=>res();r.onerror=rej;});}
+async function metaGet(k,def){const v=await dbGet('meta',k);return v?v.v:def;}
+async function metaSet(k,v){return dbPut('meta',{k,v});}
+
+/* ---------- estado en memoria (cache) ---------- */
+const _nowD = new Date();
+const S = {projects:[], entries:[], tasks:[], files:[], attBytes:{}, cfg:{}, tab:'bitacora',
+  bitFilter:'all', bitQuery:'', projFilter:'all', taskFilter:'pend', detailId:null,
+  bitView:'cal', calY:_nowD.getFullYear(), calM:_nowD.getMonth(), calSel:todayISO(),
+  fileFilter:'all', fileQuery:'', fileSort:'recientes',
+  session:null, team:[], perms:null};
+
+/* ---------- Roles y permisos ---------- */
+const ROLES = [
+  {k:'desarrollador', t:'Desarrollador', d:'Acceso total: gestiona equipo, permisos y ajustes.'},
+  {k:'administrador', t:'Administrador', d:'Crea y edita cualquier contenido; sin ajustes del sistema.'},
+  {k:'usuario',       t:'Usuario',       d:'Crea y edita solo lo suyo; ve lo demás.'},
+  {k:'observador',    t:'Observador',    d:'Solo lectura.'},
+];
+const roleInfo = k => ROLES.find(r=>r.k===k) || ROLES[2];
+const CAPS = [
+  {k:'crear',          t:'Crear contenido'},
+  {k:'editarPropio',   t:'Editar/borrar lo propio'},
+  {k:'editarTodo',     t:'Editar/borrar de todos'},
+  {k:'gestionarEquipo',t:'Gestionar equipo'},
+  {k:'ajustes',        t:'Ajustes del sistema'},
+];
+const DEFAULT_PERMS = {
+  desarrollador:{crear:true, editarPropio:true, editarTodo:true, gestionarEquipo:true, ajustes:true},
+  administrador:{crear:true, editarPropio:true, editarTodo:true, gestionarEquipo:false, ajustes:false},
+  usuario:      {crear:true, editarPropio:true, editarTodo:false, gestionarEquipo:false, ajustes:false},
+  observador:   {crear:false,editarPropio:false,editarTodo:false, gestionarEquipo:false, ajustes:false},
+};
+const myRole = ()=> S.session ? S.session.role : 'observador';
+const myUser = ()=> S.session ? String(S.session.username).toLowerCase() : '';
+function cap(k){ const p=(S.perms||DEFAULT_PERMS)[myRole()]||{}; return !!p[k]; }
+const canCreate = ()=> cap('crear');
+function canEditItem(owner){
+  if(cap('editarTodo')) return true;
+  if(cap('editarPropio')) return !!owner && String(owner).toLowerCase()===myUser();
+  return false;
+}
+const canManageTeam = ()=> cap('gestionarEquipo');
+const canSettings   = ()=> cap('ajustes');
+
+async function loadAll(){
+  S.projects = await dbGetAll('projects');
+  S.entries  = await dbGetAll('entries');
+  S.tasks    = await dbGetAll('tasks');
+  S.files    = await dbGetAll('files');
+  const atts  = await dbGetAll('atts');   // cache local de bytes (no se sincroniza)
+  S.attBytes = {}; atts.forEach(a=>{ S.attBytes[a.id]=a.dataUrl; });
+  S.cfg = await metaGet('cfg', {autor:'', url:DEFAULT_SYNC_URL, token:DEFAULT_TOKEN, lastSync:0});
+  S.session = await metaGet('session', null);
+  S.perms   = await metaGet('perms', null) || DEFAULT_PERMS;
+  S.team    = await metaGet('team', []);
+  // Asegurar conexión por defecto y migrar token viejo (p.ej. MINUTAS2026 → BITACORAET2026)
+  let _cfgChanged=false;
+  if(!S.cfg.url && DEFAULT_SYNC_URL){ S.cfg.url=DEFAULT_SYNC_URL; _cfgChanged=true; }
+  if(S.cfg.url===DEFAULT_SYNC_URL && S.cfg.token!==DEFAULT_TOKEN){ S.cfg.token=DEFAULT_TOKEN; _cfgChanged=true; }
+  if(!S.cfg.token){ S.cfg.token=DEFAULT_TOKEN; _cfgChanged=true; }
+  if(_cfgChanged) await metaSet('cfg',S.cfg);
+}
+const activeProjects = ()=> S.projects.filter(p=>!p.deleted);
+const activeEntries  = ()=> S.entries.filter(e=>!e.deleted);
+const activeTasks    = ()=> S.tasks.filter(t=>!t.deleted);
+const activeFiles    = ()=> S.files.filter(f=>!f.deleted);
+const projById = id => S.projects.find(p=>p.id===id);
+
+/* ============================================================
+   Navegación
+   ============================================================ */
+function go(tab){
+  S.tab=tab;
+  $$('.view').forEach(v=>v.classList.remove('active'));
+  $$('nav.tabs button').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  if(tab==='detalle'){ $('#v-detalle').classList.add('active'); }
+  else { $('#v-'+tab).classList.add('active'); S.detailId=null; }
+  render();
+  applyRoleUI();
+}
+$$('nav.tabs button').forEach(b=>b.onclick=()=>go(b.dataset.tab));
+
+/* ============================================================
+   Render
+   ============================================================ */
+function render(){
+  if(S.tab==='bitacora') renderBitacora();
+  else if(S.tab==='proyectos') renderProyectos();
+  else if(S.tab==='tareas') renderTareas();
+  else if(S.tab==='archivos') renderArchivos();
+  else if(S.tab==='equipo') renderEquipo();
+  else if(S.tab==='detalle') renderDetalle();
+}
+
+/* ---- Bitácora ---- */
+function renderBitacora(){
+  // filtros por proyecto
+  const f=$('#bitFilters'); f.innerHTML='';
+  const mk=(k,label)=>{const c=document.createElement('span');c.className='chip'+(S.bitFilter===k?' on':'');c.textContent=label;c.onclick=()=>{S.bitFilter=k;renderBitacora();};return c;};
+  f.appendChild(mk('all','Todas'));
+  activeProjects().forEach(p=>f.appendChild(mk(p.id,p.name)));
+
+  $('#tgCal').classList.toggle('on', S.bitView==='cal');
+  $('#tgList').classList.toggle('on', S.bitView==='list');
+
+  const q=S.bitQuery.trim().toLowerCase();
+  const cal=$('#bitCal'), box=$('#bitList');
+  // buscar o modo lista -> lista cronológica
+  if(q || S.bitView==='list'){ cal.style.display='none'; renderBitList(q); return; }
+  cal.style.display=''; renderCalendar(); renderDayEntries();
+}
+
+function entriesFiltered(){
+  let list=activeEntries();
+  if(S.bitFilter!=='all') list=list.filter(e=>e.projectId===S.bitFilter);
+  return list;
+}
+function entryItemHTML(e){
+  const p=projById(e.projectId); const tpl=TEMPLATES[e.tipo]||TEMPLATES.libre;
+  const natt=(e.adjuntos||[]).length;
+  return `<div class="item" onclick="openEntry('${e.id}')">
+    <div class="avatar">${tpl.icon}</div>
+    <div class="main">
+      <div class="t">${esc(e.titulo||tpl.t)}</div>
+      <div class="s">${esc((e.cuerpo||resumenCampos(e)||'').slice(0,160))}</div>
+      <div class="row wrap" style="margin-top:5px;gap:6px">
+        ${p?`<span class="chip"><span class="tag-dot" style="background:${estInfo(p.estado).c}"></span>${esc(p.name)}</span>`:''}
+        ${e.campos&&e.campos.gps?`<span class="chip">📍 GPS</span>`:''}
+        ${natt?`<span class="chip">📎 ${natt}</span>`:''}
+      </div>
+    </div>
+    <div class="meta">${esc(tpl.t)}<br>${esc(relTime(e.updatedAt||e.createdAt))}</div>
+  </div>`;
+}
+function renderBitList(q){
+  let list=entriesFiltered();
+  if(q){ list=list.filter(e=>{ const p=projById(e.projectId);
+    return [e.titulo,e.cuerpo,p&&p.name,JSON.stringify(e.campos||{})].join(' ').toLowerCase().includes(q); }); }
+  list.sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||'')||b.createdAt-a.createdAt);
+  const box=$('#bitList');
+  if(!list.length){ box.innerHTML=emptyBox('📓', q?'Sin resultados':'Aún no hay notas', q?'Prueba con otra palabra.':'Toca ＋ para registrar la primera nota.'); return; }
+  const groups={}; list.forEach(e=>{(groups[e.fecha]=groups[e.fecha]||[]).push(e);});
+  let html='';
+  Object.keys(groups).sort((a,b)=>b.localeCompare(a)).forEach(fecha=>{
+    html+=`<div class="daygroup"><div class="dayhdr">${esc(fmtDate(fecha))}</div><div class="card">`;
+    groups[fecha].forEach(e=>html+=entryItemHTML(e));
+    html+=`</div></div>`;
+  });
+  box.innerHTML=html;
+}
+
+/* ---- Calendario mensual (estilo DayNotez: iconos por día) ---- */
+const MONTHS=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+function pad2(n){return String(n).padStart(2,'0');}
+// un color distinto por proyecto (estable según su orden)
+const PROJ_PALETTE=['#7D1C4B','#1f6f8b','#2e7d52','#b4701f','#8e44ad','#c0392b','#16a085','#BFA262','#d35400','#2c3e50'];
+function projColor(id){ const i=activeProjects().findIndex(p=>p.id===id); return PROJ_PALETTE[(i<0?0:i)%PROJ_PALETTE.length]; }
+function scheduledProjects(){
+  let projs=activeProjects().filter(p=>p.inicio||p.fin);
+  if(S.bitFilter!=='all') projs=projs.filter(p=>p.id===S.bitFilter);
+  return projs.map(p=>{ const a=p.inicio||p.fin, b=p.fin||p.inicio;
+    return {id:p.id, name:p.name, start:(a<=b?a:b), end:(a<=b?b:a), color:projColor(p.id)}; })
+    .sort((x,y)=>x.start.localeCompare(y.start)).slice(0,6); // hasta 6 líneas
+}
+function renderCalendar(){
+  const y=S.calY, m=S.calM, prefix=`${y}-${pad2(m+1)}-`;
+  const byDay={};
+  entriesFiltered().forEach(e=>{ if(e.fecha&&e.fecha.startsWith(prefix)){ (byDay[e.fecha]=byDay[e.fecha]||[]).push(e); } });
+  const tByDay={};
+  (S.bitFilter==='all'?activeTasks():activeTasks().filter(t=>t.projectId===S.bitFilter))
+    .forEach(t=>{ if(t.vence&&t.vence.startsWith(prefix)){ (tByDay[t.vence]=tByDay[t.vence]||[]).push(t); } });
+  const startDow=(new Date(y,m,1).getDay()+6)%7;      // lunes=0
+  const daysIn=new Date(y,m+1,0).getDate();
+  const today=todayISO();
+  const lanes=scheduledProjects();                    // líneas de proyecto
+  let cells='';
+  for(let i=0;i<startDow;i++) cells+=`<div class="cal-cell blank"></div>`;
+  for(let d=1; d<=daysIn; d++){
+    const iso=prefix+pad2(d);
+    const dow=(startDow+d-1)%7, wknd=(dow>=5);
+    const ents=byDay[iso]||[];
+    const icons=ents.slice(0,3).map(e=>(TEMPLATES[e.tipo]||TEMPLATES.libre).icon).join('');
+    const more=ents.length>3?`<span class="more">+${ents.length-3}</span>`:'';
+    const tdue=tByDay[iso]||[];
+    const tmark=tdue.length?`<span class="tmark">✓${tdue.length>1?tdue.length:''}</span>`:'';
+    let bars='';
+    if(lanes.length){ bars='<div class="bars">'+lanes.map(l=>{
+      if(iso>=l.start && iso<=l.end){ const c='bar'+(iso===l.start?' s':'')+(iso===l.end?' e':'');
+        return `<div class="${c}" style="background:${l.color}"></div>`; }
+      return `<div class="bar blank"></div>`;
+    }).join('')+'</div>'; }
+    const cls=['cal-cell']; if(iso===S.calSel)cls.push('sel'); if(iso===today)cls.push('today'); if(wknd&&iso!==S.calSel)cls.push('wknd');
+    cells+=`<div class="${cls.join(' ')}" onclick="selDay('${iso}')"><span class="n">${d}</span><div class="ics">${icons}${more}${tmark}</div>${bars}</div>`;
+  }
+  const dows=['L','M','M','J','V','S','D'];
+  const legend = lanes.length? `<div class="cal-legend">`+lanes.map(l=>`<span class="lg" onclick="openDetalle('${l.id}')"><span class="sw" style="background:${l.color}"></span><span class="nm">${esc(l.name)}</span></span>`).join('')+`</div>`:'';
+  $('#bitCal').innerHTML=`<div class="cal">
+    <div class="cal-hd">
+      <button class="cal-nav" onclick="calShift(-1)">‹</button>
+      <div class="m">${MONTHS[m]} ${y}</div>
+      <button class="cal-nav" onclick="calShift(1)">›</button>
+    </div>
+    <div class="cal-grid">${dows.map((w,i)=>`<div class="cal-dow${i>=5?' wk':''}">${w}</div>`).join('')}${cells}</div>
+    ${legend}
+  </div>`;
+}
+function calShift(delta){ let m=S.calM+delta, y=S.calY; if(m<0){m=11;y--;} if(m>11){m=0;y++;} S.calM=m; S.calY=y; renderBitacora(); }
+function selDay(iso){ S.calSel=iso; renderBitacora(); }
+function setBitView(v){ S.bitView=v; renderBitacora(); }
+function renderDayEntries(){
+  const iso=S.calSel;
+  const ents=entriesFiltered().filter(e=>e.fecha===iso).sort((a,b)=>b.createdAt-a.createdAt);
+  let html=`<div class="dayhead"><div class="d">${esc(fmtDate(iso))}</div>
+    ${canCreate()?`<button class="btn gold sm" onclick="newEntryForDay()">＋ nota</button> <button class="btn sm" onclick="newTaskForDay()">＋ tarea</button>`:''}</div>`;
+  if(!ents.length) html+=`<div class="card"><div class="empty" style="padding:26px 16px"><div class="big">📓</div><div class="muted" style="margin-top:6px">Sin notas este día.<br>Toca «＋ nota» para agregar una.</div></div></div>`;
+  else html+=`<div class="card">`+ents.map(entryItemHTML).join('')+`</div>`;
+  // tareas que vencen este día
+  const tdue=activeTasks().filter(t=>t.vence===iso && (S.bitFilter==='all'||t.projectId===S.bitFilter))
+    .sort((a,b)=>(!!a.hecho-!!b.hecho)||b.createdAt-a.createdAt);
+  if(tdue.length){
+    html+=`<div class="sec-title" style="margin:16px 2px 8px;font-size:.95rem"><span class="hex"></span> Tareas que vencen <span class="count">${tdue.length}</span></div><div class="card" style="padding:4px 14px">`;
+    html+=tdue.map(t=>{ const p=projById(t.projectId); const overdue=!t.hecho&&t.vence<todayISO();
+      return `<div class="task${t.hecho?' done':''}">
+        <div class="check${t.hecho?' on':''}" onclick="toggleTaskQuick(event,'${t.id}')">${t.hecho?'✓':''}</div>
+        <div style="flex:1" onclick="openTask('${t.id}')"><div class="tt">${esc(t.titulo)}</div>
+        <div class="small muted">${p?esc(p.name)+' · ':''}${t.asignado?esc(t.asignado)+' · ':''}<span style="color:${overdue?'var(--danger)':'inherit'}">${t.hecho?'hecha':(overdue?'vencida':'pendiente')}</span></div></div></div>`;
+    }).join('');
+    html+=`</div>`;
+  }
+  $('#bitList').innerHTML=html;
+}
+async function toggleTaskQuick(ev,id){ ev.stopPropagation(); const t=S.tasks.find(x=>x.id===id); if(!t)return;
+  if(!canEditItem(t.createdBy)){ toast('No puedes modificar esta tarea'); return; }
+  t.hecho=!t.hecho; t.updatedAt=now(); await dbPut('tasks',t); scheduleSync(); render(); }
+function newEntryForDay(){ chooseTemplate(); }
+function resumenCampos(e){ if(!e.campos) return ''; const tpl=TEMPLATES[e.tipo]; if(!tpl) return '';
+  return tpl.campos.map(c=>e.campos[c.id]).filter(Boolean).join(' · '); }
+
+/* ---- Proyectos ---- */
+function renderDash(){
+  const el=$('#projDash'); if(!el) return;
+  const today=todayISO();
+  const in7=new Date(); in7.setDate(in7.getDate()+7);
+  const in7iso=new Date(in7.getTime()-in7.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+  const ym=today.slice(0,7);
+  const nProj=activeProjects().filter(p=>p.estado!=='concluido').length;
+  const nPend=activeTasks().filter(t=>!t.hecho).length;
+  const nVence=activeTasks().filter(t=>!t.hecho && t.vence && t.vence<=in7iso).length;
+  const nNotasMes=activeEntries().filter(e=>e.fecha && e.fecha.slice(0,7)===ym).length;
+  const nFiles=activeFiles().length;
+  const nombre=(S.session&&S.session.nombre)?String(S.session.nombre).split(' ')[0]:'equipo';
+  let hoy=new Date().toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});
+  hoy=hoy.charAt(0).toUpperCase()+hoy.slice(1);
+  el.innerHTML=`<div class="dash-hero">
+    <div class="hi">Hola, ${esc(nombre)} 👋</div>
+    <div class="sub">${esc(hoy)} · Estudios Territoriales</div>
+    <div class="kpi-row">
+      <div class="kpi gold" onclick="renderProyectos()"><div class="ic">📁</div><div class="n">${nProj}</div><div class="l">Proyectos en curso</div></div>
+      <div class="kpi" onclick="go('tareas')"><div class="ic">✓</div><div class="n">${nPend}</div><div class="l">Tareas pendientes</div></div>
+      <div class="kpi warn" onclick="go('tareas')"><div class="ic">⏰</div><div class="n">${nVence}</div><div class="l">Por vencer (7 días)</div></div>
+      <div class="kpi ok" onclick="go('bitacora')"><div class="ic">📓</div><div class="n">${nNotasMes}</div><div class="l">Notas este mes</div></div>
+    </div>
+  </div>
+  <div class="dash-mini">
+    <div class="m">🗂️ <b>${nFiles}</b> archivos</div>
+    <div class="m">👥 <b>${(S.team||[]).length||1}</b> en el equipo</div>
+    <div class="m">${S.cfg&&S.cfg.url?'🟢 Sincronizado':'⚪ Sin conexión'}</div>
+  </div>`;
+}
+function renderProyectos(){
+  renderDash();
+  const f=$('#projFilters'); f.innerHTML='';
+  const mk=(k,label)=>{const c=document.createElement('span');c.className='chip'+(S.projFilter===k?' on':'');c.textContent=label;c.onclick=()=>{S.projFilter=k;renderProyectos();};return c;};
+  f.appendChild(mk('all','Todos'));
+  ESTADOS.forEach(e=>f.appendChild(mk(e.k,e.t)));
+
+  let list=activeProjects();
+  if(S.projFilter!=='all') list=list.filter(p=>p.estado===S.projFilter);
+  list.sort((a,b)=> (b.updatedAt||0)-(a.updatedAt||0));
+  $('#projCount').textContent=activeProjects().length;
+
+  const box=$('#projList');
+  if(!list.length){ box.innerHTML=emptyBox('📁','Sin proyectos','Toca ＋ para crear el primer proyecto del departamento.'); return; }
+  let html='';
+  list.forEach(p=>{
+    const ei=estInfo(p.estado);
+    const nEnt=activeEntries().filter(e=>e.projectId===p.id).length;
+    const tks=activeTasks().filter(t=>t.projectId===p.id);
+    const done=tks.filter(t=>t.hecho).length;
+    const pct=tks.length?Math.round(done/tks.length*100):0;
+    html+=`<div class="card" onclick="openDetalle('${p.id}')" style="cursor:pointer">
+      <div class="pad">
+        <div class="row" style="align-items:flex-start">
+          <div style="flex:1"><h3 style="color:var(--guinda-osc)">${esc(p.name)}</h3>
+            <div class="muted small" style="margin-top:3px">${esc(p.municipio||'—')}${p.responsable?' · '+esc(p.responsable):''}</div>
+          </div>
+          <span class="chip est" style="background:${ei.c}">${ei.t}</span>
+        </div>
+        ${p.descripcion?`<div class="small muted" style="margin-top:8px">${esc(p.descripcion.slice(0,140))}</div>`:''}
+        <div class="row" style="margin-top:10px;gap:14px">
+          <span class="small muted">📓 ${nEnt} notas</span>
+          <span class="small muted">✓ ${done}/${tks.length} tareas</span>
+          ${(p.inicio||p.fin)?`<span class="small muted right">${esc(fmtShort(p.inicio))}${p.fin?' → '+esc(fmtShort(p.fin)):''}</span>`:''}
+        </div>
+        ${tks.length?`<div class="prog" style="margin-top:8px"><i style="width:${pct}%"></i></div>`:''}
+      </div>
+    </div>`;
+  });
+  box.innerHTML=html;
+}
+
+/* ---- Tareas ---- */
+function renderTareas(){
+  const f=$('#taskFilters'); f.innerHTML='';
+  const mk=(k,label)=>{const c=document.createElement('span');c.className='chip'+(S.taskFilter===k?' on':'');c.textContent=label;c.onclick=()=>{S.taskFilter=k;renderTareas();};return c;};
+  f.appendChild(mk('pend','Pendientes')); f.appendChild(mk('all','Todas')); f.appendChild(mk('done','Hechas'));
+
+  let list=activeTasks();
+  if(S.taskFilter==='pend') list=list.filter(t=>!t.hecho);
+  else if(S.taskFilter==='done') list=list.filter(t=>t.hecho);
+  list.sort((a,b)=>{ if(!!a.hecho!==!!b.hecho) return a.hecho?1:-1;
+    return (a.vence||'9999').localeCompare(b.vence||'9999') || b.createdAt-a.createdAt; });
+  $('#taskCount').textContent=activeTasks().filter(t=>!t.hecho).length;
+
+  const box=$('#taskList');
+  if(!list.length){ box.innerHTML=emptyBox('✓','Sin tareas','Las tareas aparecen aquí. Créalas dentro de un proyecto o con ＋.'); return; }
+  const box2=document.createElement('div'); box2.className='card'; box2.style.padding='4px 14px';
+  list.forEach(t=>{
+    const p=projById(t.projectId);
+    const overdue = t.vence && !t.hecho && t.vence<todayISO();
+    const d=document.createElement('div'); d.className='task'+(t.hecho?' done':'');
+    d.innerHTML=`<div class="check${t.hecho?' on':''}">${t.hecho?'✓':''}</div>
+      <div style="flex:1" onclick="openTask('${t.id}')">
+        <div class="tt">${esc(t.titulo)}</div>
+        <div class="small muted">${p?esc(p.name)+' · ':''}${t.asignado?esc(t.asignado)+' · ':''}${t.vence?`<span style="color:${overdue?'var(--danger)':'inherit'}">vence ${esc(fmtShort(t.vence))}</span>`:'sin fecha'}</div>
+      </div>`;
+    d.querySelector('.check').onclick=async ev=>{ev.stopPropagation(); if(!canEditItem(t.createdBy)){toast('No puedes modificar esta tarea');return;} t.hecho=!t.hecho; t.updatedAt=now(); await dbPut('tasks',t); renderTareas();};
+    box2.appendChild(d);
+  });
+  box.innerHTML=''; box.appendChild(box2);
+}
+
+/* ---- Archivos ---- */
+function fmtSize(b){ if(!b) return ''; if(b<1024) return b+' B'; if(b<1048576) return Math.round(b/1024)+' KB'; return (b/1048576).toFixed(1)+' MB'; }
+function allFileItems(){
+  const items=[];
+  activeFiles().forEach(f=>items.push({...f, source:'archivo'}));
+  activeEntries().forEach(e=>(e.adjuntos||[]).forEach(a=>items.push({
+    id:a.id, name:a.name, type:a.type, size:a.size||0, fecha:e.fecha, descripcion:e.titulo||'',
+    clasificacion:autoClasif(a.type,a.name), projectId:e.projectId, driveId:a.driveId, url:a.url,
+    source:'nota', entryId:e.id, createdAt:e.createdAt, updatedAt:e.updatedAt })));
+  return items;
+}
+function fileItemHTML(i){
+  const ci=clasifInfo(i.clasificacion), p=projById(i.projectId);
+  const meta=[fmtShort(i.fecha), fmtSize(i.size)].filter(Boolean).join(' · ');
+  const act = i.source==='nota' ? `openEntry('${i.entryId}')` : `openFileItem('${i.id}')`;
+  return `<div class="item" onclick="${act}">
+    <div class="avatar">${iconFor(i.type,i.name)}</div>
+    <div class="main">
+      <div class="t">${esc(i.name||'archivo')}</div>
+      ${i.descripcion?`<div class="s">${esc(i.descripcion)}</div>`:''}
+      <div class="row wrap" style="margin-top:5px;gap:6px">
+        <span class="chip">${ci.icon} ${ci.t}</span>
+        ${p?`<span class="chip"><span class="tag-dot" style="background:${estInfo(p.estado).c}"></span>${esc(p.name)}</span>`:''}
+        ${i.driveId?`<span class="chip">☁ Drive</span>`:''}
+        ${i.source==='nota'?`<span class="chip">📓 en nota</span>`:''}
+      </div>
+    </div>
+    <div class="meta">${esc(meta)}</div>
+  </div>`;
+}
+function renderArchivos(){
+  const f=$('#fileFilters'); f.innerHTML='';
+  const mk=(k,label)=>{const c=document.createElement('span');c.className='chip'+(S.fileFilter===k?' on':'');c.textContent=label;c.onclick=()=>{S.fileFilter=k;renderArchivos();};return c;};
+  f.appendChild(mk('all','Todos'));
+  CLASIF.forEach(c=>f.appendChild(mk(c.k, c.icon+' '+c.t)));
+  $('#fileSort').value=S.fileSort;
+
+  let items=allFileItems();
+  if(S.fileFilter!=='all') items=items.filter(i=>i.clasificacion===S.fileFilter);
+  const q=S.fileQuery.trim().toLowerCase();
+  if(q) items=items.filter(i=>[i.name,i.descripcion,(projById(i.projectId)||{}).name].join(' ').toLowerCase().includes(q));
+  if(S.fileSort==='nombre') items.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+  else if(S.fileSort==='tamano') items.sort((a,b)=>(b.size||0)-(a.size||0));
+  else if(S.fileSort==='tipo') items.sort((a,b)=>a.clasificacion.localeCompare(b.clasificacion)||(b.fecha||'').localeCompare(a.fecha||''));
+  else items.sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||'')||(b.createdAt||0)-(a.createdAt||0));
+
+  const box=$('#fileList');
+  if(!items.length){ box.innerHTML=emptyBox('🗂️', (q||S.fileFilter!=='all')?'Sin archivos':'Aún no hay archivos', 'Toca ＋ para subir Excel, KML, PDF, fotos, video… sin necesidad de una nota.'); return; }
+  const grp=(title,arr)=>`<div class="daygroup"><div class="dayhdr">${esc(title)}</div><div class="card">`+arr.map(fileItemHTML).join('')+`</div></div>`;
+  let html='';
+  if(S.fileSort==='tipo'){
+    const g={}; items.forEach(i=>{(g[i.clasificacion]=g[i.clasificacion]||[]).push(i);});
+    CLASIF.forEach(c=>{ if(g[c.k]) html+=grp(`${c.icon} ${c.t}`, g[c.k]); });
+  } else if(S.fileSort==='recientes'){
+    const g={}; items.forEach(i=>{const k=(i.fecha||'').slice(0,7)||'0000-00';(g[k]=g[k]||[]).push(i);});
+    Object.keys(g).sort((a,b)=>b.localeCompare(a)).forEach(k=>{ const [y,m]=k.split('-');
+      html+=grp(m&&+m?`${MONTHS[+m-1]} ${y}`:'Sin fecha', g[k]); });
+  } else html=`<div class="card">`+items.map(fileItemHTML).join('')+`</div>`;
+  box.innerHTML=html;
+}
+function readAsDataURL(file){ return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file);}); }
+let _pendingFiles=[];
+function newFile(){ _pendingFiles=[]; openFileForm(null); }
+function editFile(id){ openFileForm(id); }
+function openFileForm(id){
+  const f = id? {...S.files.find(x=>x.id===id)} : {id:null,name:'',type:'',size:0,fecha:defaultFecha(),descripcion:'',clasificacion:'otro',projectId:(S.detailId||'')};
+  const projOpts=`<option value="">(sin proyecto)</option>`+activeProjects().map(p=>`<option value="${p.id}" ${f.projectId===p.id?'selected':''}>${esc(p.name)}</option>`).join('');
+  const clasOpts=CLASIF.map(c=>`<option value="${c.k}" ${f.clasificacion===c.k?'selected':''}>${c.icon} ${c.t}</option>`).join('');
+  const editable = id? canEditItem(f.createdBy) : canCreate();
+  openSheet(id?'Editar archivo':'Subir archivo', `
+    ${editable?'':roBanner()}
+    ${id?`<div class="row" style="gap:10px;margin-bottom:12px"><div class="avatar">${iconFor(f.type,f.name)}</div><div><b>${esc(f.name)}</b><div class="small muted">${fmtSize(f.size)}</div></div></div>`:`
+      <button class="btn sec block" type="button" onclick="$('#nf_file').click()">📎 Seleccionar archivo(s)</button>
+      <input type="file" id="nf_file" class="hidden" multiple>
+      <div id="nf_list" class="small" style="margin:8px 0"></div>`}
+    <div class="grid2">
+      <label class="fld"><span>Fecha</span><input type="date" id="nf_fecha" value="${esc(f.fecha)}"></label>
+      <label class="fld"><span>Clasificación</span><select id="nf_clas">${clasOpts}</select></label>
+    </div>
+    <label class="fld"><span>Proyecto (opcional)</span><select id="nf_proj">${projOpts}</select></label>
+    <label class="fld"><span>Descripción</span><textarea id="nf_desc" placeholder="¿Qué es este archivo?">${esc(f.descripcion)}</textarea></label>
+    ${!S.cfg.url?`<div class="small muted">Sin sincronización: el archivo se guarda en este dispositivo. Configura ⚙ para compartirlo con el equipo (Drive).</div>`:''}
+  `, !editable ? [{label:'Cerrar',cls:'sec',on:closeSheet}] : [
+    ...(id?[{label:'🗑',cls:'danger',on:()=>delFile(id)}]:[]),
+    {label:id?'Guardar':'Subir', on:()=> id? saveFileMeta(id) : saveNewFiles() }
+  ]);
+  if(!id){ $('#nf_file').onchange=ev=>{ _pendingFiles=[...ev.target.files];
+    if(_pendingFiles[0]) $('#nf_clas').value=autoClasif(_pendingFiles[0].type,_pendingFiles[0].name);
+    $('#nf_list').innerHTML=_pendingFiles.map(x=>`📎 ${esc(x.name)} <span class="muted">(${fmtSize(x.size)})</span>`).join('<br>'); }; }
+}
+async function saveNewFiles(){
+  if(!_pendingFiles.length){ toast('Selecciona al menos un archivo'); return; }
+  const fecha=$('#nf_fecha').value||todayISO(), clas=$('#nf_clas').value, projectId=$('#nf_proj').value, desc=$('#nf_desc').value.trim();
+  const pName=(projById(projectId)||{}).name||'';
+  let ok=0;
+  for(const file of _pendingFiles){
+    if(file.size>MAX_ATT){ toast(`"${file.name}" supera 25 MB; omitido`); continue; }
+    const dataUrl=await readAsDataURL(file);
+    const rec={id:uid(),name:file.name,type:file.type||'application/octet-stream',size:file.size,
+      fecha,descripcion:desc,clasificacion:clas,projectId,driveId:null,url:null,createdBy:myUser(),createdAt:now(),updatedAt:now(),deleted:false};
+    if(S.cfg.url){ try{ setDot('busy'); toast('Subiendo '+file.name+'…');
+      const up=await driveUpload({name:rec.name,type:rec.type,dataUrl}, pName); rec.driveId=up.id; rec.url=up.url; ok++;
+    }catch(err){ console.error(err); toast('No se pudo subir '+file.name+' (queda local)'); } }
+    await dbPut('files',rec); S.files.push(rec);
+    await dbPut('atts',{id:rec.id,entryId:'__file__',dataUrl}); S.attBytes[rec.id]=dataUrl;
+  }
+  updateSyncDot(); closeSheet(); toast(`${_pendingFiles.length} archivo(s) guardado(s)${ok?` · ${ok} en Drive`:''}`); scheduleSync(); render();
+}
+async function saveFileMeta(id){
+  const f=S.files.find(x=>x.id===id); if(!f) return;
+  f.fecha=$('#nf_fecha').value||f.fecha; f.clasificacion=$('#nf_clas').value; f.projectId=$('#nf_proj').value; f.descripcion=$('#nf_desc').value.trim(); f.updatedAt=now();
+  await dbPut('files',f); closeSheet(); toast('Archivo actualizado'); scheduleSync(); render();
+}
+async function delFile(id){
+  if(!confirm('¿Quitar este archivo del listado? (si ya está en Drive, el archivo en Drive NO se borra)')) return;
+  const f=S.files.find(x=>x.id===id); f.deleted=true; f.updatedAt=now(); await dbPut('files',f);
+  await dbDel('atts',id); delete S.attBytes[id];
+  closeSheet(); toast('Archivo quitado'); scheduleSync(); render();
+}
+function openFileItem(id){
+  const f=S.files.find(x=>x.id===id); if(!f) return;
+  const dst=f.url||S.attBytes[f.id]; const ci=clasifInfo(f.clasificacion); const p=projById(f.projectId);
+  openSheet(f.name||'Archivo', `
+    <div class="row" style="gap:12px;margin-bottom:12px">
+      <div class="avatar" style="width:54px;height:54px;font-size:1.7rem">${iconFor(f.type,f.name)}</div>
+      <div style="flex:1"><div style="font-weight:600;word-break:break-word">${esc(f.name)}</div>
+        <div class="small muted">${ci.icon} ${ci.t} · ${esc(fmtShort(f.fecha))}${f.size?' · '+fmtSize(f.size):''}</div></div>
+    </div>
+    ${f.descripcion?`<p style="white-space:pre-wrap">${esc(f.descripcion)}</p>`:''}
+    ${p?`<div class="small muted">Proyecto: ${esc(p.name)}</div>`:''}
+    <div class="small muted" style="margin-top:6px">${f.driveId?'☁ En Google Drive':(dst?'Guardado en este dispositivo':'Archivo no disponible en este dispositivo')}</div>
+  `, [
+    ...(canEditItem(f.createdBy)?[{label:'🗑',cls:'danger',on:()=>delFile(id)},{label:'✎ Editar',cls:'ghost',on:()=>editFile(id)}]:[]),
+    ...(dst?[{label:'Abrir',on:()=>window.open(dst,'_blank')}]:[{label:'Cerrar',cls:'sec',on:closeSheet}])
+  ]);
+}
+
+/* ---- Detalle de proyecto ---- */
+function openDetalle(id){ S.detailId=id; go('detalle'); }
+function renderDetalle(){
+  const p=projById(S.detailId); const box=$('#v-detalle');
+  if(!p){ box.innerHTML=emptyBox('📁','Proyecto no encontrado',''); return; }
+  const ei=estInfo(p.estado);
+  const ents=activeEntries().filter(e=>e.projectId===p.id).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+  const tks=activeTasks().filter(t=>t.projectId===p.id);
+  const done=tks.filter(t=>t.hecho).length;
+  box.innerHTML=`
+    <button class="btn ghost sm" onclick="go('proyectos')" style="margin-bottom:10px">← Proyectos</button>
+    <div class="detail-hero">
+      <h2>${esc(p.name)}</h2>
+      <div class="meta-row">
+        <span class="chip est" style="background:rgba(255,255,255,.22)">${ei.t}</span>
+        ${p.municipio?`<span class="chip">📍 ${esc(p.municipio)}</span>`:''}
+        ${p.responsable?`<span class="chip">👤 ${esc(p.responsable)}</span>`:''}
+      </div>
+      ${(p.inicio||p.fin)?`<div class="small" style="margin-top:8px;opacity:.9">${esc(fmtShort(p.inicio))}${p.fin?' → '+esc(fmtShort(p.fin)):''}</div>`:''}
+      ${p.descripcion?`<div style="margin-top:10px">${esc(p.descripcion)}</div>`:''}
+    </div>
+    <div class="row wrap" style="margin-bottom:12px;gap:8px">
+      ${canCreate()?`<button class="btn sm" onclick="newEntry('${p.id}')">＋ Nota</button>`:''}
+      ${canCreate()?`<button class="btn gold sm" onclick="newTask('${p.id}')">＋ Tarea</button>`:''}
+      <button class="btn ghost sm" onclick="editProject('${p.id}')">${canEditItem(p.createdBy)?'✎ Editar':'👁️ Ver'}</button>
+    </div>
+
+    <div class="sec-title"><span class="hex"></span> Tareas <span class="count">${done}/${tks.length}</span></div>
+    <div class="card" id="detTasks" style="padding:4px 14px"></div>
+
+    <div class="sec-title" style="margin-top:16px"><span class="hex"></span> Bitácora <span class="count">${ents.length}</span></div>
+    <div class="card" id="detEntries"></div>
+  `;
+  // tareas
+  const dt=$('#detTasks');
+  if(!tks.length) dt.innerHTML='<div class="muted small" style="padding:10px 0">Sin tareas.</div>';
+  else tks.sort((a,b)=>(!!a.hecho-!!b.hecho)||(a.vence||'9999').localeCompare(b.vence||'9999')).forEach(t=>{
+    const d=document.createElement('div');d.className='task'+(t.hecho?' done':'');
+    d.innerHTML=`<div class="check${t.hecho?' on':''}">${t.hecho?'✓':''}</div>
+      <div style="flex:1" onclick="openTask('${t.id}')"><div class="tt">${esc(t.titulo)}</div>
+      <div class="small muted">${t.asignado?esc(t.asignado)+' · ':''}${t.vence?'vence '+esc(fmtShort(t.vence)):'sin fecha'}</div></div>`;
+    d.querySelector('.check').onclick=async ev=>{ev.stopPropagation(); if(!canEditItem(t.createdBy)){toast('No puedes modificar esta tarea');return;} t.hecho=!t.hecho;t.updatedAt=now();await dbPut('tasks',t);renderDetalle();};
+    dt.appendChild(d);
+  });
+  // entradas
+  const de=$('#detEntries');
+  if(!ents.length) de.innerHTML='<div class="muted small pad">Sin notas todavía.</div>';
+  else ents.forEach(e=>{ const tpl=TEMPLATES[e.tipo]||TEMPLATES.libre; const natt=(e.adjuntos||[]).length;
+    const it=document.createElement('div');it.className='item';it.onclick=()=>openEntry(e.id);
+    it.innerHTML=`<div class="avatar">${tpl.icon}</div><div class="main">
+      <div class="t">${esc(e.titulo||tpl.t)}</div>
+      <div class="s">${esc((e.cuerpo||resumenCampos(e)||'').slice(0,140))}</div></div>
+      <div class="meta">${esc(fmtShort(e.fecha))}${natt?'<br>📎 '+natt:''}</div>`;
+    de.appendChild(it);
+  });
+}
+
+function emptyBox(ic,t,s){return `<div class="empty"><div class="big">${ic}</div><h3 style="margin:8px 0 4px;color:var(--guinda-osc)">${esc(t)}</h3><div>${esc(s)}</div></div>`;}
+
+/* ============================================================
+   FAB — menú de creación según la pestaña
+   ============================================================ */
+$('#fab').onclick=()=>{
+  if(S.tab==='equipo'){ if(canManageTeam()) newUser(); else toast('Solo el Desarrollador gestiona el equipo'); return; }
+  if(!canCreate()){ toast('Tu rol es de solo lectura'); return; }
+  if(S.tab==='proyectos') return newProject();
+  if(S.tab==='tareas')    return newTask();
+  if(S.tab==='archivos')  return newFile();
+  chooseTemplate(); // bitácora → elegir plantilla
+};
+function chooseTemplate(){
+  const dia = (S.bitView==='cal' && S.calSel && S.calSel!==todayISO()) ? ` · ${fmtShort(S.calSel)}` : '';
+  openSheet('Nueva nota'+dia, `
+    <div class="muted small" style="margin-bottom:10px">Elige una plantilla:</div>
+    ${Object.entries(TEMPLATES).map(([k,t])=>`
+      <div class="item" style="border:1px solid var(--linea);border-radius:12px;margin-bottom:8px" onclick="closeSheet();newEntry(null,'${k}')">
+        <div class="avatar">${t.icon}</div><div class="main"><div class="t">${t.t}</div>
+        <div class="s">${t.campos.length?t.campos.map(c=>c.l).join(' · '):'Texto libre'}</div></div></div>`).join('')}
+  `, []);
+}
+function defaultFecha(){ return (S.tab==='bitacora' && S.bitView==='cal' && S.calSel) ? S.calSel : todayISO(); }
+
+/* ============================================================
+   Modal genérico
+   ============================================================ */
+function openSheet(title, bodyHTML, footerBtns){
+  $('#sheetTitle').textContent=title;
+  $('#sheetBody').innerHTML=bodyHTML;
+  const f=$('#sheetFooter'); f.innerHTML='';
+  (footerBtns||[]).forEach(b=>{ const btn=document.createElement('button');
+    btn.className='btn '+(b.cls||''); btn.textContent=b.label; btn.onclick=b.on; f.appendChild(btn); });
+  f.style.display=(footerBtns&&footerBtns.length)?'flex':'none';
+  $('#sheetBg').classList.add('open');
+}
+function closeSheet(){ $('#sheetBg').classList.remove('open'); }
+$('#sheetClose').onclick=closeSheet;
+$('#sheetBg').onclick=e=>{ if(e.target===$('#sheetBg')) closeSheet(); };
+
+/* ============================================================
+   Proyectos — crear / editar
+   ============================================================ */
+function projForm(p){
+  return `
+  <label class="fld"><span>Nombre del proyecto *</span><input id="f_name" value="${esc(p.name)}" placeholder="Ej. Estudio de factibilidad Gran San José"></label>
+  <div class="grid2">
+    <label class="fld"><span>Estado</span><select id="f_estado">${ESTADOS.map(e=>`<option value="${e.k}" ${p.estado===e.k?'selected':''}>${e.t}</option>`).join('')}</select></label>
+    <label class="fld"><span>Municipio</span><input id="f_muni" value="${esc(p.municipio)}" placeholder="Municipio / zona"></label>
+  </div>
+  <label class="fld"><span>Responsable</span><input id="f_resp" value="${esc(p.responsable)}" placeholder="Nombre del responsable"></label>
+  <div class="grid2">
+    <label class="fld"><span>Inicio</span><input type="date" id="f_ini" value="${esc(p.inicio)}"></label>
+    <label class="fld"><span>Fin / meta</span><input type="date" id="f_fin" value="${esc(p.fin)}"></label>
+  </div>
+  <label class="fld"><span>Descripción</span><textarea id="f_desc" placeholder="Objetivo, alcance, notas…">${esc(p.descripcion)}</textarea></label>`;
+}
+function roBanner(){ return `<div class="small" style="background:var(--card-dorado);color:var(--dorado-osc);border-radius:10px;padding:8px 10px;margin-bottom:12px">👁️ Solo lectura — tu rol no permite editar este elemento.</div>`; }
+function newProject(){ editProject(null); }
+function editProject(id){
+  const p = id? {...projById(id)} : {id:null,name:'',estado:'planeacion',municipio:'',responsable:'',inicio:'',fin:'',descripcion:''};
+  const editable = id? canEditItem(p.createdBy) : canCreate();
+  openSheet(id?'Editar proyecto':'Nuevo proyecto', (editable?'':roBanner())+projForm(p),
+    !editable ? [{label:'Cerrar',cls:'sec',on:closeSheet}] :
+    [ ...(id?[{label:'Eliminar',cls:'danger',on:()=>delProject(id)}]:[]),
+      {label:id?'Guardar':'Crear', on:async()=>{
+        const name=$('#f_name').value.trim(); if(!name){toast('Escribe un nombre');return;}
+        const rec = id? projById(id) : {id:uid(),createdAt:now(),createdBy:myUser()};
+        Object.assign(rec,{name,estado:$('#f_estado').value,municipio:$('#f_muni').value.trim(),
+          responsable:$('#f_resp').value.trim(),inicio:$('#f_ini').value,fin:$('#f_fin').value,
+          descripcion:$('#f_desc').value.trim(),updatedAt:now(),deleted:false});
+        if(!id) S.projects.push(rec);
+        await dbPut('projects',rec); closeSheet(); toast('Proyecto guardado'); scheduleSync();
+        if(S.tab==='detalle') renderDetalle(); else { go('proyectos'); }
+      }} ]);
+}
+async function delProject(id){
+  const p=projById(id); if(!p) return;
+  if(!confirm(`¿Eliminar "${p.name}"? Sus notas y tareas quedarán sin proyecto.`)) return;
+  p.deleted=true; p.updatedAt=now(); await dbPut('projects',p);
+  closeSheet(); toast('Proyecto eliminado'); scheduleSync(); go('proyectos');
+}
+
+/* ============================================================
+   Notas (bitácora) — crear / editar
+   ============================================================ */
+let _editEntryAtts=[]; // adjuntos en edición (memoria)
+function newEntry(projectId, tipo){ openEntry(null, projectId, tipo||'libre'); }
+async function openEntry(id, projectId, tipo){
+  const e = id? {...S.entries.find(x=>x.id===id)} :
+    {id:null, fecha:defaultFecha(), projectId:projectId||S.bitFilter!=='all'&&S.bitFilter||'', tipo:tipo||'libre',
+     titulo:'', cuerpo:'', campos:{}, autor:S.cfg.autor||''};
+  _editEntryAtts = id? ((S.entries.find(x=>x.id===id).adjuntos)||[]).map(a=>({...a, dataUrl:S.attBytes[a.id]||null})) : [];
+  const editable = id? canEditItem(e.createdBy) : canCreate();
+  const tpl=TEMPLATES[e.tipo]||TEMPLATES.libre;
+  const projOpts = `<option value="">(sin proyecto)</option>`+activeProjects().map(p=>`<option value="${p.id}" ${e.projectId===p.id?'selected':''}>${esc(p.name)}</option>`).join('');
+  const camposHTML = tpl.campos.map(c=>{
+    const v=esc((e.campos||{})[c.id]||'');
+    if(c.tipo==='area') return `<label class="fld"><span>${c.l}</span><textarea id="c_${c.id}">${v}</textarea></label>`;
+    if(c.tipo==='num')  return `<label class="fld"><span>${c.l}</span><input type="number" id="c_${c.id}" value="${v}"></label>`;
+    if(c.tipo==='gps')  return `<label class="fld"><span>${c.l}</span>
+       <div class="row"><input id="c_${c.id}" value="${v}" placeholder="lat, lng" style="flex:1">
+       <button class="btn gold sm" type="button" onclick="grabGPS('c_${c.id}')">📍 Ubicar</button></div>
+       <div class="small muted" id="c_${c.id}_m" style="margin-top:3px"></div></label>`;
+    return `<label class="fld"><span>${c.l}</span><input id="c_${c.id}" value="${v}"></label>`;
+  }).join('');
+
+  openSheet(id?'Editar nota':tpl.t+' · nueva', `
+    ${editable?'':roBanner()}
+    <div class="grid2">
+      <label class="fld"><span>Fecha</span><input type="date" id="e_fecha" value="${esc(e.fecha)}"></label>
+      <label class="fld"><span>Proyecto</span><select id="e_proj">${projOpts}</select></label>
+    </div>
+    <label class="fld"><span>Plantilla</span><select id="e_tipo">${Object.entries(TEMPLATES).map(([k,t])=>`<option value="${k}" ${e.tipo===k?'selected':''}>${t.icon} ${t.t}</option>`).join('')}</select></label>
+    <label class="fld"><span>Título</span><input id="e_titulo" value="${esc(e.titulo)}" placeholder="${esc(tpl.t)}"></label>
+    <div id="e_campos">${camposHTML}</div>
+    <label class="fld"><span>${tpl.campos.length?'Notas adicionales':'Contenido'}</span><textarea id="e_cuerpo" style="min-height:120px">${esc(e.cuerpo)}</textarea></label>
+    <label class="fld"><span>Autor</span><input id="e_autor" value="${esc(e.autor||'')}" placeholder="Tu nombre"></label>
+    <div class="fld"><span style="display:block;font-size:.8rem;font-weight:600;color:var(--guinda-osc);margin-bottom:4px">Adjuntos</span>
+      <div class="attgrid" id="e_atts"></div>
+      <div class="row wrap" style="margin-top:8px;gap:8px">
+        <button class="btn sec sm" type="button" onclick="pickFile('cam')">📷 Foto</button>
+        <button class="btn sec sm" type="button" onclick="pickFile('file')">📎 Archivo</button>
+      </div>
+      <div class="small muted" style="margin-top:6px">Excel, KML/KMZ, PDF, audio, video, etc. ${S.cfg.url?'Se suben a Google Drive y se comparten con el equipo.':'Se guardan en este dispositivo (configura la sincronización para compartirlos).'}</div>
+      <input type="file" id="e_file" accept="image/*" capture="environment" class="hidden">
+      <input type="file" id="e_file2" class="hidden" multiple>
+    </div>
+  `, editable ? [
+    ...(id?[{label:'🗑',cls:'danger',on:()=>delEntry(id)},{label:'✉ Correo',cls:'ghost',on:()=>emailNote(id)}]:[]),
+    {label:id?'Guardar':'Crear', on:()=>saveEntry(id,e)}
+  ] : [
+    ...(id?[{label:'✉ Correo',cls:'ghost',on:()=>emailNote(id)}]:[]),
+    {label:'Cerrar',cls:'sec',on:closeSheet}
+  ]);
+
+  // cambio de plantilla en caliente
+  $('#e_tipo').onchange=()=>{ // re-abrir conservando lo escrito
+    const draft=collectEntry(e); draft.tipo=$('#e_tipo').value; draft.id=id;
+    // preservar adjuntos ya cargados
+    openEntryKeep(id,draft);
+  };
+  $('#e_file').onchange=ev=>addFiles(ev.target.files);
+  $('#e_file2').onchange=ev=>addFiles(ev.target.files);
+  renderAtts();
+}
+function openEntryKeep(id,draft){ // reabrir editor con un borrador (al cambiar plantilla)
+  const e={...draft}; const tpl=TEMPLATES[e.tipo]||TEMPLATES.libre;
+  // conservamos _editEntryAtts
+  const saved=_editEntryAtts;
+  openEntry(id, e.projectId, e.tipo);
+  _editEntryAtts=saved;
+  // rellenar valores
+  setTimeout(()=>{ try{
+    $('#e_fecha').value=e.fecha||todayISO(); $('#e_titulo').value=e.titulo||'';
+    $('#e_cuerpo').value=e.cuerpo||''; $('#e_autor').value=e.autor||'';
+    if($('#e_proj')) $('#e_proj').value=e.projectId||'';
+    tpl.campos.forEach(c=>{const el=$('#c_'+c.id); if(el&&e.campos&&e.campos[c.id]!=null) el.value=e.campos[c.id];});
+    renderAtts();
+  }catch(_){}},0);
+}
+function collectEntry(e){
+  const tpl=TEMPLATES[$('#e_tipo')?$('#e_tipo').value:e.tipo]||TEMPLATES.libre;
+  const campos={}; tpl.campos.forEach(c=>{const el=$('#c_'+c.id); if(el&&el.value.trim())campos[c.id]=el.value.trim();});
+  return {fecha:$('#e_fecha').value||todayISO(), projectId:$('#e_proj')?$('#e_proj').value:(e.projectId||''),
+    tipo:$('#e_tipo').value, titulo:$('#e_titulo').value.trim(), cuerpo:$('#e_cuerpo').value.trim(),
+    campos, autor:$('#e_autor').value.trim()};
+}
+function iconFor(type,name){
+  const t=(type||'')+' '+(name||'').toLowerCase();
+  if(/image\//.test(type)) return '🖼️'; if(/video\//.test(type)) return '🎬'; if(/audio\//.test(type)) return '🎵';
+  if(/pdf/.test(t)) return '📕'; if(/sheet|excel|csv|\.xls|\.csv/.test(t)) return '📊';
+  if(/word|document|\.doc/.test(t)) return '📄'; if(/kml|kmz|google-earth/.test(t)) return '🌐';
+  if(/zip|compress|rar|7z/.test(t)) return '🗜️'; return '📎';
+}
+function renderAtts(){
+  const box=$('#e_atts'); if(!box) return; box.innerHTML='';
+  _editEntryAtts.forEach((a,i)=>{ const d=document.createElement('div');d.className='att';
+    const thumb = a.dataUrl && (a.type||'').startsWith('image/') ? a.dataUrl
+      : (a.driveId && (a.type||'').startsWith('image/') ? `https://drive.google.com/thumbnail?id=${a.driveId}&sz=w200` : '');
+    const cloud = a.driveId ? `<div class="cloud" title="En Google Drive">☁</div>` : '';
+    d.innerHTML = thumb
+      ? `<img src="${thumb}" referrerpolicy="no-referrer"><button class="x" type="button">✕</button>${cloud}`
+      : `<div class="file">${iconFor(a.type,a.name)}</div><div class="nm">${esc(a.name||'archivo')}</div><button class="x" type="button">✕</button>${cloud}`;
+    d.querySelector('.x').onclick=ev=>{ev.stopPropagation();_editEntryAtts.splice(i,1);renderAtts();};
+    d.onclick=ev=>{ if(ev.target.classList.contains('x'))return; const dst=a.url||a.dataUrl; if(dst) window.open(dst,'_blank'); };
+    box.appendChild(d);
+  });
+}
+function pickFile(mode){ $(mode==='cam'?'#e_file':'#e_file2').click(); }
+const MAX_ATT = 25*1024*1024; // 25 MB por archivo
+function addFiles(files){
+  [...files].forEach(f=>{
+    if(f.type.startsWith('image/') && f.size>1.5*1024*1024){
+      compressImage(f).then(du=>{_editEntryAtts.push({id:uid(),name:f.name,type:'image/jpeg',size:du.length,dataUrl:du});renderAtts();}); return;
+    }
+    if(f.size>MAX_ATT){ toast(`"${f.name}" supera 25 MB; súbelo manual a Drive y pega el enlace.`); return; }
+    const r=new FileReader(); r.onload=()=>{ _editEntryAtts.push({id:uid(),name:f.name,type:f.type||'application/octet-stream',size:f.size,dataUrl:r.result}); renderAtts(); };
+    r.readAsDataURL(f);
+  });
+}
+function compressImage(file){ return new Promise(res=>{
+  const img=new Image(); const r=new FileReader();
+  r.onload=()=>{ img.onload=()=>{ const max=1600; let {width:w,height:h}=img;
+    if(w>max||h>max){ const s=Math.min(max/w,max/h); w=Math.round(w*s); h=Math.round(h*s); }
+    const cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+    cv.getContext('2d').drawImage(img,0,0,w,h); res(cv.toDataURL('image/jpeg',.82)); };
+    img.src=r.result; };
+  r.readAsDataURL(file);
+});}
+async function grabGPS(fieldId){
+  const m=$('#'+fieldId+'_m'); if(m)m.textContent='Obteniendo ubicación…';
+  if(!navigator.geolocation){ if(m)m.textContent='GPS no disponible'; return; }
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const {latitude:la,longitude:lo,accuracy:ac}=pos.coords;
+    $('#'+fieldId).value=`${la.toFixed(6)}, ${lo.toFixed(6)}`;
+    if(m)m.innerHTML=`±${Math.round(ac)} m · <a class="maplink" href="https://maps.google.com/?q=${la},${lo}" target="_blank">ver en mapa</a>`;
+  }, err=>{ if(m)m.textContent='No se pudo obtener ubicación ('+err.message+')'; },
+  {enableHighAccuracy:true,timeout:10000,maximumAge:0});
+}
+async function driveUpload(att, projectName){
+  const res=await fetch(S.cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify({token:S.cfg.token, action:'upload', name:att.name, mime:att.type, data:att.dataUrl, projectName})});
+  const d=await res.json(); if(!d.ok) throw new Error(d.error||'falló la subida'); return d;
+}
+async function saveEntry(id,e0){
+  const data=collectEntry(e0);
+  if(!data.titulo && !data.cuerpo && !Object.keys(data.campos).length && !_editEntryAtts.length){ toast('Escribe algo primero'); return; }
+  const rec = id? S.entries.find(x=>x.id===id) : {id:uid(),createdAt:now(),createdBy:myUser()};
+  const prevAtts = id? (rec.adjuntos||[]) : [];
+  const pName = (projById(data.projectId)||{}).name || '';
+
+  // 1) subir adjuntos nuevos a Google Drive (si hay sincronización configurada)
+  let subidos=0;
+  if(S.cfg.url){
+    for(const a of _editEntryAtts){
+      if(!a.driveId && a.dataUrl){
+        try{ setDot('busy'); toast('Subiendo '+(a.name||'archivo')+'…');
+          const up=await driveUpload(a, pName); a.driveId=up.id; a.url=up.url; subidos++;
+        }catch(err){ console.error(err); toast('No se pudo subir '+(a.name||'archivo')+' (queda local)'); }
+      }
+    }
+  }
+  // 2) cache local de bytes (no se sincroniza): guardar los que tengan dataUrl, borrar los quitados
+  const keep=new Set(_editEntryAtts.map(a=>a.id));
+  for(const a of prevAtts){ if(!keep.has(a.id)){ await dbDel('atts',a.id); delete S.attBytes[a.id]; } }
+  for(const a of _editEntryAtts){ if(a.dataUrl){ await dbPut('atts',{id:a.id,entryId:rec.id,dataUrl:a.dataUrl}); S.attBytes[a.id]=a.dataUrl; } }
+  // 3) metadata (ligera, sí sincroniza) en la nota
+  data.adjuntos = _editEntryAtts.map(a=>({id:a.id,name:a.name,type:a.type,size:a.size||0,driveId:a.driveId||null,url:a.url||null}));
+
+  Object.assign(rec,data,{updatedAt:now(),deleted:false});
+  if(!id) S.entries.push(rec);
+  await dbPut('entries',rec);
+  if(S.cfg.autor!==data.autor && data.autor){ S.cfg.autor=data.autor; await metaSet('cfg',S.cfg); }
+  updateSyncDot();
+  closeSheet(); toast(subidos?`Nota guardada · ${subidos} archivo(s) en Drive`:'Nota guardada'); scheduleSync(); render();
+}
+async function delEntry(id){
+  if(!confirm('¿Eliminar esta nota?')) return;
+  const e=S.entries.find(x=>x.id===id); e.deleted=true; e.updatedAt=now(); await dbPut('entries',e);
+  closeSheet(); toast('Nota eliminada'); scheduleSync(); render();
+}
+
+/* ---------- Enviar nota por correo ---------- */
+function noteToHTML(e){
+  const p=projById(e.projectId), tpl=TEMPLATES[e.tipo]||TEMPLATES.libre;
+  let h=`<div style="font-family:Segoe UI,Arial,sans-serif;color:#2b232a;max-width:620px">`;
+  h+=`<div style="background:#7D1C4B;color:#fff;padding:12px 16px;border-radius:10px 10px 0 0"><b style="font-size:16px">${esc(e.titulo||tpl.t)}</b><br><span style="opacity:.85;font-size:12px">${esc(tpl.t)} · ${esc(fmtDate(e.fecha))}</span></div>`;
+  h+=`<div style="border:1px solid #E7DDE2;border-top:0;padding:14px 16px;border-radius:0 0 10px 10px">`;
+  if(p) h+=`<p><b>Proyecto:</b> ${esc(p.name)}${p.municipio?' · '+esc(p.municipio):''}</p>`;
+  (tpl.campos||[]).forEach(c=>{ const v=(e.campos||{})[c.id]; if(v) h+=`<p><b>${esc(c.l)}:</b> ${esc(v).replace(/\n/g,'<br>')}</p>`; });
+  if(e.cuerpo) h+=`<p>${esc(e.cuerpo).replace(/\n/g,'<br>')}</p>`;
+  const links=(e.adjuntos||[]).filter(a=>a.url);
+  if(links.length) h+=`<p><b>Adjuntos:</b></p><ul>`+links.map(a=>`<li><a href="${a.url}">${esc(a.name||'archivo')}</a></li>`).join('')+`</ul>`;
+  if(e.autor) h+=`<p style="color:#8a7f86;font-size:12px">Registró: ${esc(e.autor)}</p>`;
+  h+=`<p style="color:#8a7f86;font-size:11px;border-top:1px solid #E7DDE2;padding-top:8px;margin-top:8px">Enviado desde <b>Bitácora ET</b> · Estudios Territoriales (SEGEY)</p></div></div>`;
+  return h;
+}
+function noteToText(e){
+  const p=projById(e.projectId), tpl=TEMPLATES[e.tipo]||TEMPLATES.libre;
+  let t=`${e.titulo||tpl.t}\n${tpl.t} · ${fmtDate(e.fecha)}\n`;
+  if(p) t+=`Proyecto: ${p.name}${p.municipio?' · '+p.municipio:''}\n`;
+  (tpl.campos||[]).forEach(c=>{ const v=(e.campos||{})[c.id]; if(v) t+=`${c.l}: ${v}\n`; });
+  if(e.cuerpo) t+=`\n${e.cuerpo}\n`;
+  const links=(e.adjuntos||[]).filter(a=>a.url);
+  if(links.length) t+=`\nAdjuntos:\n`+links.map(a=>`- ${a.name}: ${a.url}`).join('\n')+`\n`;
+  if(e.autor) t+=`\nRegistró: ${e.autor}`;
+  return t;
+}
+function emailNote(id){
+  const e=S.entries.find(x=>x.id===id); if(!e) return;
+  const tpl=TEMPLATES[e.tipo]||TEMPLATES.libre;
+  const hasDrive=(e.adjuntos||[]).some(a=>a.driveId);
+  const hasLocalOnly=(e.adjuntos||[]).some(a=>!a.driveId);
+  openSheet('Enviar nota por correo', `
+    <label class="fld"><span>Para (separa con comas)</span><input id="em_to" placeholder="correo1@ejemplo.com, correo2@…"></label>
+    <label class="fld"><span>CC (opcional)</span><input id="em_cc" placeholder=""></label>
+    <label class="fld"><span>Asunto</span><input id="em_sub" value="${esc('['+tpl.t+'] '+(e.titulo||fmtShort(e.fecha)))}"></label>
+    ${hasDrive?`<label class="row" style="gap:8px;margin-bottom:8px"><input type="checkbox" id="em_att" checked style="width:auto"><span>Adjuntar archivos de Drive</span></label>`:''}
+    ${hasLocalOnly?`<div class="small muted" style="margin-bottom:8px">Los adjuntos que aún no están en Drive no se enviarán.</div>`:''}
+    ${!S.cfg.url?`<div class="small muted">Sin sincronización: se abrirá tu app de correo con el texto (sin archivos adjuntos).</div>`:''}
+  `, [{label:'Enviar', on:()=>sendEmail(id)}]);
+}
+async function sendEmail(id){
+  const e=S.entries.find(x=>x.id===id);
+  const to=$('#em_to').value.trim(); if(!to){toast('Escribe un destinatario');return;}
+  const cc=$('#em_cc').value.trim(); const subject=$('#em_sub').value.trim()||'Nota · Bitácora ET';
+  if(S.cfg.url){
+    const attach = $('#em_att') ? $('#em_att').checked : false;
+    const driveIds = attach ? (e.adjuntos||[]).filter(a=>a.driveId).map(a=>a.driveId) : [];
+    try{ setDot('busy'); toast('Enviando correo…');
+      const res=await fetch(S.cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body:JSON.stringify({token:S.cfg.token, action:'email', to, cc, subject, html:noteToHTML(e), text:noteToText(e), driveIds})});
+      const d=await res.json(); updateSyncDot();
+      if(!d.ok) throw new Error(d.error||'falló el envío');
+      closeSheet(); toast(`Correo enviado a ${d.sent}${d.adjuntos?` · ${d.adjuntos} adj.`:''}`);
+    }catch(err){ setDot('err'); toast('No se pudo enviar: '+err.message); }
+  } else {
+    const ccp=cc?`&cc=${encodeURIComponent(cc)}`:'';
+    window.location.href=`mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}${ccp}&body=${encodeURIComponent(noteToText(e))}`;
+    closeSheet();
+  }
+}
+
+/* ============================================================
+   Tareas — crear / editar
+   ============================================================ */
+function newTask(projectId){ openTask(null, projectId); }
+function newTaskForDay(){ if(canCreate()) openTask(null, '', S.calSel); }
+function openTask(id, projectId, dueDate){
+  const t = id? {...activeTasks().find(x=>x.id===id)} :
+    {id:null,projectId:projectId|| (S.detailId||'') ,titulo:'',asignado:S.cfg.autor||'',vence:dueDate||'',hecho:false};
+  const editable = id? canEditItem(t.createdBy) : canCreate();
+  const projOpts=`<option value="">(sin proyecto)</option>`+activeProjects().map(p=>`<option value="${p.id}" ${t.projectId===p.id?'selected':''}>${esc(p.name)}</option>`).join('');
+  openSheet(id?'Editar tarea':'Nueva tarea', `
+    ${editable?'':roBanner()}
+    <label class="fld"><span>Tarea *</span><input id="t_titulo" value="${esc(t.titulo)}" placeholder="¿Qué hay que hacer?"></label>
+    <label class="fld"><span>Proyecto</span><select id="t_proj">${projOpts}</select></label>
+    <div class="grid2">
+      <label class="fld"><span>Responsable</span><input id="t_asig" value="${esc(t.asignado)}"></label>
+      <label class="fld"><span>Vence</span><input type="date" id="t_vence" value="${esc(t.vence)}"></label>
+    </div>
+    <label class="row" style="gap:8px"><input type="checkbox" id="t_hecho" ${t.hecho?'checked':''} style="width:auto"> <span>Marcada como hecha</span></label>
+  `, !editable ? [{label:'Cerrar',cls:'sec',on:closeSheet}] : [
+    ...(id?[{label:'Eliminar',cls:'danger',on:()=>delTask(id)}]:[]),
+    {label:id?'Guardar':'Crear', on:async()=>{
+      const titulo=$('#t_titulo').value.trim(); if(!titulo){toast('Escribe la tarea');return;}
+      const rec=id? S.tasks.find(x=>x.id===id):{id:uid(),createdAt:now(),createdBy:myUser()};
+      Object.assign(rec,{titulo,projectId:$('#t_proj').value,asignado:$('#t_asig').value.trim(),
+        vence:$('#t_vence').value,hecho:$('#t_hecho').checked,updatedAt:now(),deleted:false});
+      if(!id) S.tasks.push(rec);
+      await dbPut('tasks',rec); closeSheet(); toast('Tarea guardada'); scheduleSync();
+      if(S.tab==='detalle') renderDetalle(); else render();
+    }}
+  ]);
+}
+async function delTask(id){ const t=S.tasks.find(x=>x.id===id); t.deleted=true; t.updatedAt=now();
+  await dbPut('tasks',t); closeSheet(); toast('Tarea eliminada'); scheduleSync();
+  if(S.tab==='detalle') renderDetalle(); else render(); }
+
+/* ============================================================
+   Configuración + Sincronización (Google Sheets vía Apps Script)
+   ============================================================ */
+/* ============================================================
+   Equipo (personal + roles + permisos)
+   ============================================================ */
+function renderEquipo(){
+  const box=$('#teamList'); const team=S.team||[];
+  $('#teamCount').textContent=team.length;
+  let html=`<div class="row wrap" style="gap:8px;margin-bottom:12px">
+    <button class="btn sec sm" onclick="refreshTeamPerms()">⟳ Actualizar</button>
+    ${canManageTeam()?`<button class="btn gold sm" onclick="editPerms()">🔐 Permisos por rol</button>`:''}
+    ${canManageTeam()?`<button class="btn sm" onclick="newUser()">＋ Usuario</button>`:''}
+  </div>`;
+  if(!S.cfg.url){ box.innerHTML=html+emptyBox('👥','Sin conexión','La gestión del equipo requiere sincronización.'); return; }
+  if(!team.length){ box.innerHTML=html+emptyBox('👥','Sin datos del equipo','Toca ⟳ Actualizar para cargarlo.'); return; }
+  const order={desarrollador:0,administrador:1,usuario:2,observador:3};
+  const list=[...team].sort((a,b)=>(order[a.role]-order[b.role])||String(a.nombre||'').localeCompare(String(b.nombre||'')));
+  html+=`<div class="card">`;
+  list.forEach(u=>{ const ri=roleInfo(u.role); const me=String(u.username).toLowerCase()===myUser();
+    html+=`<div class="item person" ${canManageTeam()?`onclick="editUser('${u.id}')"`:'style="cursor:default"'}>
+      <div class="avatar">${esc((u.nombre||u.username||'?').slice(0,1).toUpperCase())}</div>
+      <div class="main">
+        <div class="t">${esc(u.nombre||u.username)} ${me?'<span class="chip" style="padding:0 7px">tú</span>':''}</div>
+        <div class="s">@${esc(u.username)}${u.activo===false?' · inactivo':''}</div>
+        <div style="margin-top:5px"><span class="role ${esc(u.role)}">${ri.t}</span></div>
+      </div>
+      ${canManageTeam()?'<div class="meta">✎</div>':''}
+    </div>`; });
+  html+=`</div><div class="small muted" style="margin-top:10px">Tu sesión: <b>${esc(S.session?S.session.nombre:'')}</b> · <span class="role ${myRole()}">${roleInfo(myRole()).t}</span></div>`;
+  box.innerHTML=html;
+}
+function newUser(){ openUserForm(null); }
+function editUser(id){ openUserForm(id); }
+function openUserForm(id){
+  if(!canManageTeam()) return;
+  const u = id? (S.team.find(x=>x.id===id)||{}) : {id:null,nombre:'',username:'',role:'usuario',activo:true};
+  const me = id && String(u.username).toLowerCase()===myUser();
+  const roleOpts=ROLES.map(r=>`<option value="${r.k}" ${u.role===r.k?'selected':''}>${r.t}</option>`).join('');
+  openSheet(id?'Editar usuario':'Nuevo usuario', `
+    <label class="fld"><span>Nombre</span><input id="u_nombre" value="${esc(u.nombre||'')}" placeholder="Nombre completo"></label>
+    <label class="fld"><span>Usuario</span><input id="u_user" value="${esc(u.username||'')}" ${id?'readonly':''} autocapitalize="none" placeholder="usuario para entrar"></label>
+    <label class="fld"><span>Rol</span><select id="u_role">${roleOpts}</select>
+      <div class="small muted" id="u_roleDesc" style="margin-top:4px">${roleInfo(u.role).d}</div></label>
+    <label class="fld"><span>${id?'Nueva contraseña (opcional)':'Contraseña inicial'}</span><input id="u_pass" type="text" placeholder="${id?'dejar vacío = no cambiar':'contraseña'}"></label>
+    <label class="row" style="gap:8px"><input type="checkbox" id="u_activo" ${u.activo!==false?'checked':''} style="width:auto"><span>Activo (puede entrar)</span></label>
+  `, [
+    ...(id&&!me?[{label:'Eliminar',cls:'danger',on:()=>delUser(id)}]:[]),
+    {label:id?'Guardar':'Crear', on:()=>saveUser(id,u)}
+  ]);
+  $('#u_role').onchange=()=>{ $('#u_roleDesc').textContent=roleInfo($('#u_role').value).d; };
+}
+async function saveUser(id,u0){
+  const nombre=$('#u_nombre').value.trim(), username=$('#u_user').value.trim(), role=$('#u_role').value, activo=$('#u_activo').checked, password=$('#u_pass').value;
+  if(!username){ toast('Escribe el usuario'); return; }
+  if(!id && !password){ toast('Pon una contraseña inicial'); return; }
+  try{ await api('user_save',{user:{id:id||null, username, nombre, role, activo, password:password||undefined}});
+    closeSheet(); toast('Usuario guardado'); await refreshTeamPerms();
+  }catch(err){ toast('Error: '+err.message); }
+}
+async function delUser(id){
+  if(!confirm('¿Eliminar este usuario? No podrá entrar más.')) return;
+  try{ await api('user_delete',{id}); closeSheet(); toast('Usuario eliminado'); await refreshTeamPerms(); }
+  catch(err){ toast('Error: '+err.message); }
+}
+function editPerms(){
+  if(!canManageTeam()) return;
+  const P=S.perms||DEFAULT_PERMS;
+  let grid=`<div class="perm-grid"><div class="hd"></div>${ROLES.map(r=>`<div class="hd">${r.t.slice(0,5)}</div>`).join('')}`;
+  CAPS.forEach(c=>{ grid+=`<div class="cap">${c.t}</div>`+ROLES.map(r=>{
+    const checked=(P[r.k]&&P[r.k][c.k])?'checked':'';
+    const dis=(r.k==='desarrollador')?'disabled':'';
+    return `<div><input type="checkbox" data-r="${r.k}" data-c="${c.k}" ${checked} ${dis}></div>`;
+  }).join(''); });
+  grid+=`</div>`;
+  openSheet('Permisos por rol', `
+    <div class="small muted" style="margin-bottom:10px">Marca qué puede hacer cada rol. El <b>Desarrollador</b> siempre tiene todo. Ver contenido está permitido a todos.</div>
+    ${grid}
+  `, [{label:'Guardar permisos', on:()=>savePerms()}]);
+}
+async function savePerms(){
+  const P={}; ROLES.forEach(r=>{ P[r.k]={}; CAPS.forEach(c=>P[r.k][c.k]=false); });
+  $$('#sheetBody input[type=checkbox]').forEach(cb=>{ if(cb.dataset.r) P[cb.dataset.r][cb.dataset.c]=cb.checked; });
+  CAPS.forEach(c=>P.desarrollador[c.k]=true);
+  try{ const d=await api('perms_set',{permisos:P}); S.perms=d.permisos||P; await metaSet('perms',S.perms);
+    closeSheet(); toast('Permisos actualizados'); applyRoleUI(); if(S.tab==='equipo') renderEquipo();
+  }catch(err){ toast('Error: '+err.message); }
+}
+function changeMyPassword(){
+  openSheet('Cambiar mi contraseña', `
+    <label class="fld"><span>Contraseña actual</span><input id="cp_old" type="password"></label>
+    <label class="fld"><span>Nueva contraseña</span><input id="cp_new" type="password"></label>
+    <label class="fld"><span>Repetir nueva</span><input id="cp_new2" type="password"></label>
+  `, [{label:'Cambiar', on:async()=>{
+    const o=$('#cp_old').value, n=$('#cp_new').value, n2=$('#cp_new2').value;
+    if(n!==n2){ toast('Las contraseñas nuevas no coinciden'); return; }
+    if((n||'').length<4){ toast('Mínimo 4 caracteres'); return; }
+    try{ await api('change_password',{oldPass:o, newPass:n}); closeSheet(); toast('Contraseña actualizada'); }
+    catch(err){ toast('Error: '+err.message); }
+  }}]);
+}
+
+/* ---------- Acerca de ---------- */
+function showAbout(){
+  const nproj=activeProjects().length, nent=activeEntries().length, ntask=activeTasks().length, nfile=activeFiles().length;
+  const conectado = S.cfg.url ? '🟢 Conectada al equipo' : '⚪ Solo en este dispositivo';
+  openSheet('Acerca de', `
+    <div style="text-align:center;padding:4px 0 10px">
+      <div style="width:76px;height:76px;margin:0 auto 10px;border-radius:20px;background:linear-gradient(120deg,var(--guinda),var(--guinda-osc));display:grid;place-items:center;box-shadow:var(--shadow)">
+        <span style="font-size:1.6rem;font-weight:800;color:var(--dorado)">ET</span>
+      </div>
+      <h2 style="color:var(--guinda-osc)">Bitácora ET</h2>
+      <div class="muted small">Departamento de Estudios Territoriales · SEGEY</div>
+      <div class="chip" style="margin-top:8px">Versión 1.0 · octubre 2026</div>
+    </div>
+    <p style="font-size:.92rem;line-height:1.5">Aplicación para <b>coordinar los proyectos</b> del departamento: bitácora por día (calendario), proyectos con su línea de tiempo, tareas, plantillas de nota (visita de campo, minuta, avance), adjuntos en Google Drive y envío de notas por correo.</p>
+    <div class="kv"><b>Estado</b><span>${conectado}</span></div>
+    <div class="kv"><b>Contenido</b><span>${nproj} proyectos · ${nent} notas · ${ntask} tareas · ${nfile} archivos</span></div>
+    <div class="kv"><b>Funciona sin conexión</b><span>Sí — se sincroniza con el equipo al recuperar Internet</span></div>
+    <div class="kv"><b>Inspirada en</b><span>el concepto de Natara DayNotez (diario por día)</span></div>
+    <div class="kv"><b>Identidad</b><span>Renacimiento Maya · Yucatán 2024-2030</span></div>
+    <p class="small muted" style="margin-top:12px;text-align:center"><span class="hex"></span> Hecha para el equipo de Estudios Territoriales.<br>Gobierno del Estado de Yucatán · SEGEY</p>
+  `, [{label:'Cerrar', cls:'sec', on:closeSheet}]);
+}
+
+$('#btnCfg').onclick=openConfig;
+function openConfig(){
+  const c=S.cfg;
+  const nproj=activeProjects().length, nent=activeEntries().length, ntask=activeTasks().length, nfile=activeFiles().length;
+  const lastS = c.lastSync?fmtDate(new Date(c.lastSync).toISOString().slice(0,10))+' '+new Date(c.lastSync).toLocaleTimeString('es-MX'):'nunca';
+  const sys = canSettings() ? `
+    <div class="hr"></div>
+    <div class="sec-title" style="margin:0 0 8px"><span class="hex"></span> Sincronización (sistema)</div>
+    <div class="small muted" style="margin-bottom:10px">Conexión con el backend del equipo. Normalmente no necesitas cambiar esto.</div>
+    <label class="fld"><span>URL del Web App (Apps Script)</span><input id="cfg_url" value="${esc(c.url)}" placeholder="https://script.google.com/…/exec"></label>
+    <label class="fld"><span>Token</span><input id="cfg_token" value="${esc(c.token)}" placeholder="BITACORAET2026"></label>
+    <div class="row" style="gap:8px;margin-bottom:12px"><button class="btn block" onclick="syncNow()">⟳ Sincronizar ahora</button></div>
+    <div class="small muted">Última sincronización: ${lastS}</div>
+  ` : `
+    <div class="hr"></div>
+    <div class="row" style="gap:8px;margin-bottom:8px"><button class="btn block" onclick="syncNow()">⟳ Sincronizar ahora</button></div>
+    <div class="small muted">Última sincronización: ${lastS}</div>
+  `;
+  openSheet('Configuración', `
+    <div class="sec-title" style="margin:0 0 8px"><span class="hex"></span> Mi cuenta</div>
+    <div class="small" style="margin-bottom:10px">${esc(S.session?S.session.nombre:'')} · <span class="role ${myRole()}">${roleInfo(myRole()).t}</span> · @${esc(S.session?S.session.username:'')}</div>
+    <label class="fld"><span>Tu nombre (autor por defecto en notas)</span><input id="cfg_autor" value="${esc(c.autor)}" placeholder="Nombre que firma las notas"></label>
+    <div class="row wrap" style="gap:8px">
+      <button class="btn sec sm" onclick="changeMyPassword()">🔑 Cambiar contraseña</button>
+      <button class="btn danger sm" onclick="logout()">⎋ Cerrar sesión</button>
+    </div>
+    ${sys}
+    <div class="hr"></div>
+    <div class="sec-title" style="margin:0 0 8px"><span class="hex"></span> Datos locales</div>
+    <div class="small" style="margin-bottom:10px">${nproj} proyectos · ${nent} notas · ${ntask} tareas · ${nfile} archivos</div>
+    <div class="row wrap" style="gap:8px">
+      <button class="btn sec sm" onclick="exportJSON()">⬇ Respaldo (JSON)</button>
+      <button class="btn sec sm" onclick="$('#imp').click()">⬆ Restaurar</button>
+      <input type="file" id="imp" accept="application/json" class="hidden" onchange="importJSON(this.files[0])">
+    </div>
+    <div class="hr"></div>
+    <button class="btn ghost block" onclick="showAbout()">ℹ️ Acerca de Bitácora ET</button>
+  `, [{label:'Guardar', on:async()=>{
+      S.cfg.autor=$('#cfg_autor').value.trim();
+      if($('#cfg_url')) S.cfg.url=$('#cfg_url').value.trim();
+      if($('#cfg_token')) S.cfg.token=$('#cfg_token').value.trim()||DEFAULT_TOKEN;
+      await metaSet('cfg',S.cfg); closeSheet(); toast('Configuración guardada'); updateSyncDot();
+  }}]);
+}
+
+let _syncTimer=null;
+function scheduleSync(){ if(!S.cfg.url) return; clearTimeout(_syncTimer); _syncTimer=setTimeout(syncNow,4000); }
+function setDot(cls){ const d=$('#syncDot'); d.className='syncdot'+(cls?' '+cls:''); }
+function updateSyncDot(){ setDot(S.cfg.url?'on':''); }
+
+async function syncNow(){
+  if(!S.cfg.url){ toast('Configura la URL de sincronización'); openConfig(); return; }
+  setDot('busy'); $('#btnSync').style.transform='rotate(360deg)'; $('#btnSync').style.transition='.6s';
+  try{
+    // 1) push cambios locales + 2) pull remotos; el servidor hace merge last-write-wins
+    const payload={ token:S.cfg.token, action:'sync', since:S.cfg.lastSync||0,
+      projects:S.projects, entries:S.entries.map(stripHeavy), tasks:S.tasks, files:S.files };
+    const res=await fetch(S.cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
+    const data=await res.json();
+    if(!data.ok) throw new Error(data.error||'respuesta inválida');
+    await mergeRemote(data);
+    S.cfg.lastSync=now(); await metaSet('cfg',S.cfg);
+    setDot('on'); toast(`Sincronizado · ${data.counts?`${data.counts.projects||0}P ${data.counts.entries||0}N ${data.counts.tasks||0}T`:''}`);
+    render();
+  }catch(err){ setDot('err'); toast('Error al sincronizar: '+err.message); console.error(err); }
+  finally{ setTimeout(()=>{$('#btnSync').style.transform='';},650); }
+}
+function stripHeavy(e){ const {campos,adjuntos,...r}=e; return {...r, camposJSON:JSON.stringify(campos||{}), adjuntosJSON:JSON.stringify(adjuntos||[])}; }
+async function mergeRemote(data){
+  const put=async(store,arr,key)=>{ for(const r of (arr||[])){
+    const local=(S[key]||[]).find(x=>x.id===r.id);
+    const rr = key==='entries'
+      ? {...r, campos: r.camposJSON?safeJSON(r.camposJSON):(r.campos||{}), adjuntos: r.adjuntosJSON?safeJSON(r.adjuntosJSON):(r.adjuntos||[])}
+      : r;
+    delete rr.camposJSON; delete rr.adjuntosJSON;
+    // Normalizar fechas (Sheets puede devolverlas como fecha/hora ISO) a "YYYY-MM-DD"
+    const d10=v=>{ if(v==null||v==='') return ''; const s=String(v); return s.length>=10?s.slice(0,10):s; };
+    if(key==='entries'||key==='files') rr.fecha=d10(rr.fecha);
+    if(key==='tasks') rr.vence=d10(rr.vence);
+    if(key==='projects'){ rr.inicio=d10(rr.inicio); rr.fin=d10(rr.fin); }
+    if(!local || (r.updatedAt||0)>(local.updatedAt||0)){
+      await dbPut(store,rr);
+      const i=(S[key]).findIndex(x=>x.id===r.id);
+      if(i>=0) S[key][i]=rr; else S[key].push(rr);
+    }
+  }};
+  await put('projects',data.projects,'projects');
+  await put('entries',data.entries,'entries');
+  await put('tasks',data.tasks,'tasks');
+  await put('files',data.files,'files');
+}
+function safeJSON(s){ try{return JSON.parse(s);}catch(_){return {};} }
+
+$('#btnSync').onclick=syncNow;
+
+/* ============================================================
+   Acceso (login) y Equipo — vía backend
+   ============================================================ */
+async function api(action, extra){
+  if(!S.cfg.url) throw new Error('Sin conexión configurada');
+  const body=Object.assign({token:S.cfg.token, action}, extra||{});
+  if(S.session){ body.actor=S.session.username; body.session=S.session.token; }
+  const res=await fetch(S.cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)});
+  const d=await res.json(); if(!d.ok) throw new Error(d.error||'error'); return d;
+}
+function showLogin(){ $('#login').classList.remove('hidden'); $('#app').classList.add('hidden'); setTimeout(()=>{try{$('#li_user').focus();}catch(_){}} ,100); }
+function hideLogin(){ $('#login').classList.add('hidden'); $('#app').classList.remove('hidden'); }
+function loginErr(msg){ const e=$('#loginErr'); e.textContent=msg; e.classList.toggle('show', !!msg); }
+async function doLogin(){
+  const username=$('#li_user').value.trim(), password=$('#li_pass').value;
+  if(!username||!password){ loginErr('Escribe usuario y contraseña'); return; }
+  loginErr(''); const btn=$('#li_btn'); btn.disabled=true; btn.textContent='Entrando…';
+  const tryLogin=(tk)=>fetch(S.cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({token:tk, action:'login', username, password})}).then(r=>r.json());
+  try{
+    let tk=S.cfg.token||DEFAULT_TOKEN;
+    let d=await tryLogin(tk);
+    if(!d.ok && /token/i.test(d.error||'') && tk!==DEFAULT_TOKEN){ tk=DEFAULT_TOKEN; d=await tryLogin(tk); }
+    if(d.ok && tk!==S.cfg.token){ S.cfg.token=tk; await metaSet('cfg',S.cfg); } // auto-reparar token viejo
+    if(!d.ok) throw new Error(d.error||'No se pudo entrar');
+    S.session={id:d.user.id, username:d.user.username, nombre:d.user.nombre, role:d.user.role, token:d.token};
+    S.perms=d.permisos||DEFAULT_PERMS;
+    await metaSet('session',S.session); await metaSet('perms',S.perms);
+    $('#li_pass').value='';
+    hideLogin(); startApp();
+  }catch(err){ loginErr(err.message); }
+  finally{ btn.disabled=false; btn.textContent='Entrar'; }
+}
+$('#li_btn').onclick=doLogin;
+$('#li_pass').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
+async function logout(){
+  if(!confirm('¿Cerrar sesión?')) return;
+  S.session=null; await metaSet('session',null); closeSheet(); showLogin();
+}
+async function refreshTeamPerms(){
+  if(!S.cfg.url || !S.session) return;
+  try{ const d=await api('team_list'); S.team=d.team||[]; if(d.permisos){ S.perms=d.permisos; await metaSet('perms',S.perms); }
+    await metaSet('team',S.team); if(S.tab==='equipo') renderEquipo(); applyRoleUI();
+  }catch(err){ /* offline o sesión expirada */ if(/no autorizado/i.test(err.message)){ toast('Sesión expirada, vuelve a entrar'); logout2(); } }
+}
+async function logout2(){ S.session=null; await metaSet('session',null); showLogin(); }
+
+function applyRoleUI(){
+  // FAB visible solo si el rol puede crear (o gestionar equipo en pestaña Equipo)
+  const showFab = (S.tab==='equipo') ? canManageTeam() : (S.tab!=='detalle' && canCreate());
+  $('#fab').style.display = showFab ? 'grid' : 'none';
+}
+
+/* ---------- respaldo local ---------- */
+async function exportJSON(){
+  const atts=await dbGetAll('atts');
+  const blob=new Blob([JSON.stringify({v:2,exported:now(),projects:S.projects,entries:S.entries,tasks:S.tasks,files:S.files,atts},null,1)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`BitacoraET_respaldo_${todayISO()}.json`; a.click();
+  toast('Respaldo descargado');
+}
+async function importJSON(file){ if(!file) return;
+  if(!confirm('Restaurar fusionará estos datos con los actuales. ¿Continuar?')) return;
+  const txt=await file.text(); let d; try{d=JSON.parse(txt);}catch(_){toast('Archivo inválido');return;}
+  for(const p of d.projects||[]) await dbPut('projects',p);
+  for(const e of d.entries||[])  await dbPut('entries',e);
+  for(const t of d.tasks||[])    await dbPut('tasks',t);
+  for(const fl of d.files||[])   await dbPut('files',fl);
+  for(const a of d.atts||[])     await dbPut('atts',a);
+  await loadAll(); closeSheet(); toast('Datos restaurados'); render();
+}
+
+/* ============================================================
+   Búsqueda (bitácora)
+   ============================================================ */
+$('#bitSearch').oninput=e=>{ S.bitQuery=e.target.value; renderBitacora(); };
+$('#fileSearch').oninput=e=>{ S.fileQuery=e.target.value; renderArchivos(); };
+$('#fileSort').onchange=e=>{ S.fileSort=e.target.value; renderArchivos(); };
+
+/* ============================================================
+   PWA install
+   ============================================================ */
+let _deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); _deferredPrompt=e;
+  if(!localStorage.getItem('pwa_done_et')) $('#pwaBanner').classList.add('show'); });
+$('#pwaInstall').onclick=async()=>{ $('#pwaBanner').classList.remove('show'); localStorage.setItem('pwa_done_et','1');
+  if(_deferredPrompt){ _deferredPrompt.prompt(); await _deferredPrompt.userChoice; _deferredPrompt=null; } };
+$('#pwaClose').onclick=()=>{ $('#pwaBanner').classList.remove('show'); localStorage.setItem('pwa_done_et','1'); };
+
+if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+/* ============================================================
+   Arranque
+   ============================================================ */
+(async function init(){
+  await openDB(); await loadAll();
+  if(!S.session){ showLogin(); return; }
+  startApp();
+})();
+function startApp(){
+  hideLogin();
+  updateSyncDot(); render(); applyRoleUI();
+  if(S.cfg.url){ setTimeout(syncNow,1000); setTimeout(refreshTeamPerms,1400); }
+}
+</script>
+</body>
+</html>

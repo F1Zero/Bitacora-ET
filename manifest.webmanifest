@@ -1,0 +1,18 @@
+{
+  "name": "Bitácora ET · Estudios Territoriales",
+  "short_name": "Bitácora ET",
+  "description": "Bitácora y coordinación de proyectos del Departamento de Estudios Territoriales (SEGEY).",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#7D1C4B",
+  "theme_color": "#7D1C4B",
+  "lang": "es-MX",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon-180.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
