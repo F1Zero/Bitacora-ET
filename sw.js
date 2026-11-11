@@ -1,5 +1,5 @@
 ﻿/* Service worker · Bitácora ET — cache-first para uso offline */
-const CACHE = 'bitacora-et-v3';
+const CACHE = 'bitacora-et-v4';
 const ASSETS = [
   './',
   './index.html',

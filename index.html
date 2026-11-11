@@ -1577,6 +1577,7 @@ async function syncNow(){
   try{
     // 1) push cambios locales + 2) pull remotos; el servidor hace merge last-write-wins
     const payload={ token:S.cfg.token, action:'sync', since:S.cfg.lastSync||0,
+      actor:S.session?S.session.username:'', session:S.session?S.session.token:'',
       projects:S.projects, entries:S.entries.map(stripHeavy), tasks:S.tasks, files:S.files };
     const res=await fetch(S.cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
     const data=await res.json();
@@ -1585,7 +1586,10 @@ async function syncNow(){
     S.cfg.lastSync=now(); await metaSet('cfg',S.cfg);
     setDot('on'); toast(`Sincronizado · ${data.counts?`${data.counts.projects||0}P ${data.counts.entries||0}N ${data.counts.tasks||0}T`:''}`);
     render();
-  }catch(err){ setDot('err'); toast('Error al sincronizar: '+err.message); console.error(err); }
+  }catch(err){ setDot('err'); console.error(err);
+    if(/sesi[oó]n requerida|no autorizado/i.test(err.message)){ toast('Tu sesión expiró, vuelve a entrar'); logout2(); }
+    else toast('Error al sincronizar: '+err.message);
+  }
   finally{ setTimeout(()=>{$('#btnSync').style.transform='';},650); }
 }
 function stripHeavy(e){ const {campos,adjuntos,...r}=e; return {...r, camposJSON:JSON.stringify(campos||{}), adjuntosJSON:JSON.stringify(adjuntos||[])}; }
